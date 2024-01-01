@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const powerRangerSchema = new mongoose.Schema({
   name: String,
   megazord: String,
 });
 
-module.exports = mongoose.model("PowerRanger", powerRangerSchema);
+export const PowerRanger = mongoose.model("PowerRanger", powerRangerSchema);

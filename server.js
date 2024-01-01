@@ -1,11 +1,13 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
+import express from "express";
+import cors from "cors";
+
+import { connect } from "mongoose";
+import { PowerRanger } from "./PowerRanger.js";
 
 const app = express();
 const port = 3000;
 
-mongoose.connect(
+connect(
   "mongodb+srv://dbMiles:3M3r4ld5%23%23@atlascluster.s6eiwh2.mongodb.net/?retryWrites=true&w=majority"
 );
 
@@ -18,8 +20,6 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
-
-const PowerRanger = require("./PowerRanger");
 
 app.get("/power-rangers", async (req, res) => {
   try {
