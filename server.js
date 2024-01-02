@@ -1,24 +1,29 @@
-import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
+
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 import { connect } from "mongoose";
 import { PowerRanger } from "./PowerRanger.js";
 
-const app = express();
-const port = 3000;
-
 dotenv.config();
 connect(process.env.MONGODB_URI);
+
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 app.use(cors());
 
 app.get("/", (req, res) => {
   res.json({ message: "Hello from Express!" });
-});
-
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
 });
 
 app.get("/power-rangers", async (req, res) => {
@@ -28,4 +33,22 @@ app.get("/power-rangers", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+
+  socket.on("sendMessage", (msg) => {
+    console.log("Received message:", msg);
+    io.emit("receiveMessage", msg);
+  });
+});
+
+const port = 3000;
+httpServer.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
