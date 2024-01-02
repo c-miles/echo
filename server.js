@@ -7,11 +7,14 @@ import { Server } from "socket.io";
 
 import { connect } from "mongoose";
 import { PowerRanger } from "./PowerRanger.js";
+import { Room } from "./Room.js";
 
 dotenv.config();
 connect(process.env.MONGODB_URI);
 
 const app = express();
+app.use(express.json());
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -30,6 +33,16 @@ app.get("/power-rangers", async (req, res) => {
   try {
     const rangers = await PowerRanger.find();
     res.json(rangers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/create-room", async (req, res) => {
+  try {
+    const newRoom = new Room();
+    const savedRoom = await newRoom.save();
+    res.status(201).json({ roomId: savedRoom._id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

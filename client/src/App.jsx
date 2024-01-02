@@ -18,6 +18,10 @@ function App() {
     navigate("/chat");
   };
 
+  const goToEcho = () => {
+    navigate("/echo");
+  };
+
   const getRangers = async () => {
     try {
       const response = await fetch("http://localhost:3000/power-rangers");
@@ -33,6 +37,7 @@ function App() {
       <button onClick={sendRequest}>Send Request</button>
       <button onClick={getRangers}>Morphin' Time!</button>
       <button onClick={goToChat}>Go to Chat</button>
+      <button onClick={goToEcho}>Go to Echo</button>
     </div>
   );
 }
