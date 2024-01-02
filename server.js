@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 
 import { connect } from "mongoose";
 import { PowerRanger } from "./PowerRanger.js";
@@ -7,9 +8,8 @@ import { PowerRanger } from "./PowerRanger.js";
 const app = express();
 const port = 3000;
 
-connect(
-  "mongodb+srv://dbMiles:3M3r4ld5%23%23@atlascluster.s6eiwh2.mongodb.net/?retryWrites=true&w=majority"
-);
+dotenv.config();
+connect(process.env.MONGODB_URI);
 
 app.use(cors());
 
