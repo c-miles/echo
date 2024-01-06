@@ -22,20 +22,9 @@ function App() {
     navigate("/rooms");
   };
 
-  const getRangers = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/power-rangers");
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-    }
-  };
-
   return (
     <div>
       <button onClick={sendRequest}>Send Request</button>
-      <button onClick={getRangers}>Morphin' Time!</button>
       <button onClick={goToChat}>Go to Chat</button>
       <button onClick={goToRooms}>Go to Rooms</button>
     </div>
