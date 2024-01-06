@@ -38,6 +38,15 @@ app.get("/power-rangers", async (req, res) => {
   }
 });
 
+app.get("/rooms", async (req, res) => {
+  try {
+    const rooms = await Room.find();
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.post("/create-room", async (req, res) => {
   try {
     const newRoom = new Room();

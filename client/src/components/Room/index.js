@@ -1,20 +1,17 @@
 import React from "react";
-import Echo from "./Echo";
+import Room from "./Room";
 
 const peerConnectionConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
-export default function EchoChamber() {
-  const [roomId, setRoomId] = React.useState(null);
+export default function RoomContainer() {
   const [stream, setStream] = React.useState(null);
+  const [host, setHost] = React.useState(false);
 
   const localVideoRef = React.useRef();
   const remoteVideoRef = React.useRef();
 
-  const [meetingId, setMeetingID] = React.useState();
-
-  //TODO: Implement user authentication system
   const userId = Math.random().toString(36).substring(2, 15);
 
   React.useEffect(() => {
@@ -26,10 +23,10 @@ export default function EchoChamber() {
   }, []);
 
   React.useEffect(() => {
-    if (roomId && localVideoRef.current && stream) {
+    if (localVideoRef.current && stream) {
       localVideoRef.current.srcObject = stream;
     }
-  }, [roomId, stream]);
+  }, [stream]);
 
   React.useEffect(() => {
     let peerConnection;
@@ -80,27 +77,10 @@ export default function EchoChamber() {
     };
   }, [stream]);
 
-  const createRoom = () => {
-    fetch("http://localhost:3000/create-room", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setRoomId(data.roomId);
-      })
-      .catch((error) => {
-        console.error("Error creating room:", error);
-      });
-  };
-
-  return React.createElement(Echo, {
-    createRoom,
+  return React.createElement(Room, {
+    host,
     localVideoRef,
     remoteVideoRef,
-    roomId,
     stream,
   });
 }

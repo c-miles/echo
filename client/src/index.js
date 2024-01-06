@@ -4,8 +4,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import "./index.css";
 import App from "./App";
-import Chat from "./Chat";
-import Echo from "./Echo";
+import Chat from "./components/Chat";
+import Room from "./components/Room";
+import Rooms from "./components/Rooms";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -14,7 +15,8 @@ root.render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/chat" element={<Chat />} />
-        <Route path="/echo" element={<Echo />} />
+        <Route path="/room/:roomId" element={<Room />} />
+        <Route path="/rooms" element={<Rooms />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
