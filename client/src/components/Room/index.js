@@ -20,11 +20,22 @@ export default function RoomContainer() {
   const localVideoRef = React.useRef();
   const remoteVideoRef = React.useRef();
 
+  const peerConnectionRef = React.useRef(null);
   const [iceCandidatesBuffer, setIceCandidatesBuffer] = React.useState([]);
   const [readyForIce, setReadyForIce] = React.useState();
 
   const isHost = location.state?.isHost || false;
   const userIdRef = React.useRef(Math.random().toString(36).substring(2, 15));
+
+  React.useEffect(() => {
+    peerConnectionRef.current = new RTCPeerConnection(peerConnectionConfig);
+
+    return () => {
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     navigator.mediaDevices
@@ -41,18 +52,19 @@ export default function RoomContainer() {
   }, [stream]);
 
   React.useEffect(() => {
-    let peerConnection;
-    if (stream) {
-      peerConnection = new RTCPeerConnection(peerConnectionConfig);
+    socket && socket.emit("joinRoom", roomId);
+  }, [socket]);
 
-      // Add stream to peer connection
+  React.useEffect(() => {
+    if (stream) {
+      // socket && socket.emit("joinRoom", roomId);
       stream.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, stream);
+        peerConnectionRef.current.addTrack(track, stream);
       });
 
       // Set up remote stream
       let remoteStream = new MediaStream();
-      peerConnection.ontrack = (event) => {
+      peerConnectionRef.current.ontrack = (event) => {
         event.streams[0].getTracks().forEach((track) => {
           remoteStream.addTrack(track);
         });
@@ -63,19 +75,52 @@ export default function RoomContainer() {
       }
 
       // Handle ICE candidates
-      peerConnection.onicecandidate = (event) => {
+      peerConnectionRef.current.onicecandidate = (event) => {
         if (event.candidate) {
-          setIceCandidatesBuffer((prevCandidates) => [
-            ...prevCandidates,
-            event.candidate,
-          ]);
+          if (readyForIce) {
+            // Directly send the candidate if already ready
+            socket.emit("sendCandidate", {
+              roomId,
+              userId: userIdRef.current,
+              candidate: event.candidate,
+            });
+          } else {
+            // Buffer the candidate if not yet ready
+            setIceCandidatesBuffer((prevCandidates) => [
+              ...prevCandidates,
+              event.candidate,
+            ]);
+          }
         }
       };
 
+      socket.on("peerReadyForIce", ({ userId }) => {
+        if (userId !== userIdRef.current) {
+          // The other peer is ready. Send buffered candidates.
+          iceCandidatesBuffer.forEach((candidate) => {
+            socket.emit("sendCandidate", {
+              roomId,
+              userId: userIdRef.current,
+              candidate,
+            });
+          });
+          setIceCandidatesBuffer([]);
+          setReadyForIce(true);
+        }
+      });
+
+      socket.on("receiveCandidate", ({ userId, candidate }) => {
+        if (userId !== userIdRef.current) {
+          peerConnectionRef.current.addIceCandidate(
+            new RTCIceCandidate(candidate)
+          );
+        }
+      });
+
       // Create offer
       if (isHost && stream) {
-        peerConnection.createOffer().then((offer) => {
-          peerConnection.setLocalDescription(offer).then(() => {
+        peerConnectionRef.current.createOffer().then((offer) => {
+          peerConnectionRef.current.setLocalDescription(offer).then(() => {
             // Send offer to the server
             socket.emit("sendOffer", {
               roomId,
@@ -84,13 +129,36 @@ export default function RoomContainer() {
             });
           });
         });
+
+        socket.on("receiveAnswer", async ({ sdp }) => {
+          await peerConnectionRef.current.setRemoteDescription(
+            new RTCSessionDescription({ type: "answer", sdp })
+          );
+          socket.emit("readyForIce", { roomId, userId: userIdRef.current });
+        });
+      } else if (!isHost && stream) {
+        // Non-host requests the host's offer
+        socket.emit("requestOffer", { roomId });
+
+        socket.on("receiveOffer", async ({ sdp }) => {
+          await peerConnectionRef.current.setRemoteDescription(
+            new RTCSessionDescription({ type: "offer", sdp })
+          );
+
+          // Create an answer
+          const answer = await peerConnectionRef.current.createAnswer();
+          await peerConnectionRef.current.setLocalDescription(answer);
+          socket.emit("sendAnswer", {
+            roomId,
+            userId: userIdRef.current,
+            sdp: answer.sdp,
+          });
+
+          socket.emit("readyForIce", { roomId, userId: userIdRef.current });
+        });
       }
 
-      // socket.emit("readyForIce", { roomId });
-
-      // Listen for the event indicating it's time to send ICE candidates
       socket.on("readyForIce", () => {
-        // Emit buffered ICE candidates
         iceCandidatesBuffer.forEach((candidate) => {
           socket.emit("sendCandidate", {
             roomId,
@@ -98,18 +166,9 @@ export default function RoomContainer() {
             candidate,
           });
         });
-        // Clear the buffer
         setIceCandidatesBuffer([]);
       });
-
-      // More logic for receiving answer and setting remote description...
     }
-
-    return () => {
-      if (peerConnection) {
-        peerConnection.close();
-      }
-    };
   }, [stream]);
 
   return React.createElement(Room, {

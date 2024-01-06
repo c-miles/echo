@@ -69,6 +69,10 @@ io.on("connection", (socket) => {
     io.emit("receiveMessage", msg);
   });
 
+  socket.on("joinRoom", (roomId) => {
+    socket.join(roomId);
+  });
+
   socket.on("sendOffer", async ({ roomId, userId, sdp }) => {
     try {
       const room = await Room.findById(roomId);
@@ -93,11 +97,29 @@ io.on("connection", (socket) => {
 
   socket.on("requestOffer", async ({ roomId }) => {
     try {
-      const room = await Room.findById(roomId);
-      socket.emit("receiveOffer", { sdp: room.sdp });
+      const room = await Room.findById(roomId).exec();
+      if (room && room.participants.length > 0) {
+        // Assuming the host is the first participant
+        const hostSdp = room.participants[0].sdp;
+        socket.emit("receiveOffer", { sdp: hostSdp });
+      }
     } catch (error) {
       console.error("Error fetching offer:", error);
     }
+  });
+
+  socket.on("sendAnswer", ({ roomId, sdp }) => {
+    // Send the answer to the host
+    socket.to(roomId).emit("receiveAnswer", { sdp });
+  });
+
+  socket.on("readyForIce", ({ roomId, userId }) => {
+    socket.to(roomId).emit("peerReadyForIce", { userId });
+  });
+
+  socket.on("sendCandidate", ({ roomId, userId, candidate }) => {
+    // Relay candidate to other participants in the room
+    socket.to(roomId).emit("receiveCandidate", { userId, candidate });
   });
 });
 
