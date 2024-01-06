@@ -1,8 +1,13 @@
 import mongoose from "mongoose";
 
+const ParticipantSchema = new mongoose.Schema({
+  userId: String,
+  sdp: String,
+});
+
 const RoomSchema = new mongoose.Schema({
   roomId: String,
-  participants: [String],
+  participants: [ParticipantSchema],
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -28,7 +28,7 @@ export default function RoomsContainer() {
     })
       .then((response) => response.json())
       .then((data) => {
-        navigate(`/room/${data.roomId}`);
+        navigate(`/room/${data.roomId}`, { state: { isHost: true } });
       })
       .catch((error) => {
         console.error("Error creating room:", error);
@@ -36,7 +36,7 @@ export default function RoomsContainer() {
   };
 
   const joinRoom = (roomId) => {
-    navigate(`/room/${roomId}`);
+    navigate(`/room/${roomId}`, { state: { isHost: false } });
   };
 
   return React.createElement(Rooms, { createRoom, joinRoom, rooms });

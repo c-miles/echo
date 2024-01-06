@@ -68,6 +68,37 @@ io.on("connection", (socket) => {
     console.log("Received message:", msg);
     io.emit("receiveMessage", msg);
   });
+
+  socket.on("sendOffer", async ({ roomId, userId, sdp }) => {
+    try {
+      const room = await Room.findById(roomId);
+      if (room) {
+        const participantIndex = room.participants.findIndex(
+          (p) => p.userId === userId
+        );
+        if (participantIndex !== -1) {
+          // Update existing participant
+          room.participants[participantIndex].sdp = sdp;
+        } else {
+          // Add new participant
+          room.participants.push({ userId, sdp });
+        }
+        await room.save();
+        io.to(roomId).emit("offerAvailable", { userId, sdp });
+      }
+    } catch (error) {
+      console.error("Error saving offer:", error);
+    }
+  });
+
+  socket.on("requestOffer", async ({ roomId }) => {
+    try {
+      const room = await Room.findById(roomId);
+      socket.emit("receiveOffer", { sdp: room.sdp });
+    } catch (error) {
+      console.error("Error fetching offer:", error);
+    }
+  });
 });
 
 const port = 3000;
