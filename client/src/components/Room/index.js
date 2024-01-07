@@ -16,13 +16,13 @@ export default function RoomContainer() {
   const location = useLocation();
   const socket = useSocket();
 
-  const [stream, setStream] = React.useState(null);
-  const localVideoRef = React.useRef();
-  const remoteVideoRef = React.useRef();
-
-  const peerConnectionRef = React.useRef(null);
-  const [iceCandidatesBuffer, setIceCandidatesBuffer] = React.useState([]);
   const [readyForIce, setReadyForIce] = React.useState();
+  const [stream, setStream] = React.useState(null);
+  const [streamReady, setStreamReady] = React.useState(false);
+
+  const localVideoRef = React.useRef();
+  const peerConnectionRef = React.useRef(null);
+  const remoteVideoRef = React.useRef();
 
   const isHost = location.state?.isHost || false;
   const userIdRef = React.useRef(Math.random().toString(36).substring(2, 15));
@@ -42,22 +42,22 @@ export default function RoomContainer() {
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {
         setStream(mediaStream);
+        setStreamReady(true);
       });
   }, []);
 
   React.useEffect(() => {
-    if (localVideoRef.current && stream) {
+    if (localVideoRef.current && streamReady) {
       localVideoRef.current.srcObject = stream;
     }
-  }, [stream]);
+  }, [streamReady]);
 
   React.useEffect(() => {
     socket && socket.emit("joinRoom", roomId);
   }, [socket]);
 
   React.useEffect(() => {
-    if (stream) {
-      // socket && socket.emit("joinRoom", roomId);
+    if (streamReady) {
       stream.getTracks().forEach((track) => {
         peerConnectionRef.current.addTrack(track, stream);
       });
@@ -74,37 +74,32 @@ export default function RoomContainer() {
         remoteVideoRef.current.srcObject = remoteStream;
       }
 
-      // Handle ICE candidates
+      let bufferedIceCandidates = [];
+
       peerConnectionRef.current.onicecandidate = (event) => {
         if (event.candidate) {
           if (readyForIce) {
-            // Directly send the candidate if already ready
             socket.emit("sendCandidate", {
               roomId,
               userId: userIdRef.current,
               candidate: event.candidate,
             });
           } else {
-            // Buffer the candidate if not yet ready
-            setIceCandidatesBuffer((prevCandidates) => [
-              ...prevCandidates,
-              event.candidate,
-            ]);
+            bufferedIceCandidates.push(event.candidate);
           }
         }
       };
 
       socket.on("peerReadyForIce", ({ userId }) => {
-        if (userId !== userIdRef.current) {
-          // The other peer is ready. Send buffered candidates.
-          iceCandidatesBuffer.forEach((candidate) => {
+        if (userId !== userIdRef.current && bufferedIceCandidates.length > 0) {
+          bufferedIceCandidates.forEach((candidate) => {
             socket.emit("sendCandidate", {
               roomId,
               userId: userIdRef.current,
               candidate,
             });
           });
-          setIceCandidatesBuffer([]);
+          bufferedIceCandidates = [];
           setReadyForIce(true);
         }
       });
@@ -118,15 +113,14 @@ export default function RoomContainer() {
       });
 
       // Create offer
-      if (isHost && stream) {
-        peerConnectionRef.current.createOffer().then((offer) => {
-          peerConnectionRef.current.setLocalDescription(offer).then(() => {
-            // Send offer to the server
-            socket.emit("sendOffer", {
-              roomId,
-              userId: userIdRef.current,
-              sdp: offer.sdp,
-            });
+      if (isHost) {
+        peerConnectionRef.current.createOffer().then(async (offer) => {
+          await peerConnectionRef.current.setLocalDescription(offer);
+          // Send offer to the server
+          socket.emit("sendOffer", {
+            roomId,
+            userId: userIdRef.current,
+            sdp: offer.sdp,
           });
         });
 
@@ -136,7 +130,7 @@ export default function RoomContainer() {
           );
           socket.emit("readyForIce", { roomId, userId: userIdRef.current });
         });
-      } else if (!isHost && stream) {
+      } else if (!isHost) {
         // Non-host requests the host's offer
         socket.emit("requestOffer", { roomId });
 
@@ -157,19 +151,8 @@ export default function RoomContainer() {
           socket.emit("readyForIce", { roomId, userId: userIdRef.current });
         });
       }
-
-      socket.on("readyForIce", () => {
-        iceCandidatesBuffer.forEach((candidate) => {
-          socket.emit("sendCandidate", {
-            roomId,
-            userId: userIdRef.current,
-            candidate,
-          });
-        });
-        setIceCandidatesBuffer([]);
-      });
     }
-  }, [stream]);
+  }, [streamReady]);
 
   return React.createElement(Room, {
     localVideoRef,

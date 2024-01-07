@@ -1,12 +1,13 @@
 import React from "react";
 import Rooms from "./Rooms";
+import { Room } from "./types";
 
 import { useNavigate } from "react-router-dom";
 
 export default function RoomsContainer() {
   const navigate = useNavigate();
 
-  const [rooms, setRooms] = React.useState();
+  const [rooms, setRooms] = React.useState<Room[]>([]);
 
   React.useEffect(() => {
     fetch("http://localhost:3000/rooms")
@@ -27,7 +28,7 @@ export default function RoomsContainer() {
       },
     })
       .then((response) => response.json())
-      .then((data) => {
+      .then((data: { roomId: string }) => {
         navigate(`/room/${data.roomId}`, { state: { isHost: true } });
       })
       .catch((error) => {
@@ -35,9 +36,9 @@ export default function RoomsContainer() {
       });
   };
 
-  const joinRoom = (roomId) => {
+  const joinRoom = (roomId: string) => {
     navigate(`/room/${roomId}`, { state: { isHost: false } });
   };
 
-  return React.createElement(Rooms, { createRoom, joinRoom, rooms });
+  return <Rooms createRoom={createRoom} joinRoom={joinRoom} rooms={rooms} />;
 }

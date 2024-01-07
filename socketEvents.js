@@ -1,4 +1,4 @@
-import { Room } from './Room.js';
+import { Room } from "./Room.js";
 
 export const socketEvents = (io) => {
   io.on("connection", (socket) => {
@@ -12,7 +12,7 @@ export const socketEvents = (io) => {
       socket.join(roomId);
     });
 
-    // NOTE: Delete this after initial config is complete 
+    // NOTE: Delete this after initial config is complete
     socket.on("sendMessage", (msg) => {
       console.log("Received message:", msg);
       io.emit("receiveMessage", msg);
@@ -68,5 +68,3 @@ export const socketEvents = (io) => {
     });
   });
 };
-
-// export default socketEvents;
