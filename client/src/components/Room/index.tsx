@@ -13,6 +13,7 @@ const RoomContainer: React.FC = () => {
   const socket = useSocket();
 
   const [readyForIce, setReadyForIce] = useState<boolean>(false);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -26,20 +27,20 @@ const RoomContainer: React.FC = () => {
       let peerConnection = peerConnectionRef.current;
 
       stream.getTracks().forEach((track) => {
-        peerConnection?.addTrack(track, stream);
+        peerConnection.addTrack(track, stream);
       });
 
-      let remoteStream = new MediaStream();
+      const newRemoteStream = new MediaStream();
 
-      // if (peerConnection) {
       peerConnection.ontrack = (event) => {
         event.streams[0].getTracks().forEach((track) => {
-          remoteStream.addTrack(track);
+          newRemoteStream.addTrack(track);
         });
+        setRemoteStream(newRemoteStream);
       };
 
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.srcObject = newRemoteStream;
       }
 
       let bufferedIceCandidates: RTCIceCandidate[] = [];
@@ -100,28 +101,23 @@ const RoomContainer: React.FC = () => {
 
         socket.on("receiveOffer", async ({ sdp }) => {
           if (sdp) {
-            // Set remote description
             await peerConnection.setRemoteDescription(
               new RTCSessionDescription({ type: "offer", sdp })
             );
 
-            // Create and set local answer
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
 
-            // Emit the answer
             socket.emit("sendAnswer", {
               roomId,
               userId: userIdRef.current,
               sdp: answer.sdp,
             });
 
-            // Notify that the peer is ready for ICE
             socket.emit("readyForIce", { roomId, userId: userIdRef.current });
           }
         });
       }
-      // }
     }
   }, [streamReady]);
 
@@ -129,7 +125,7 @@ const RoomContainer: React.FC = () => {
     <Room
       localVideoRef={localVideoRef}
       remoteVideoRef={remoteVideoRef}
-      stream={stream}
+      remoteStream={remoteStream}
     />
   );
 };
