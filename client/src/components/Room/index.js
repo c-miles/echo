@@ -1,56 +1,22 @@
 import React from "react";
 import Room from "./Room";
 
-import { useLocation, useParams } from "react-router-dom";
-
+import useMediaStream from "./useMediaStream";
+import usePeerConnection from "./usePeerConnection";
+import useRoomState from "./useRoomState";
 import useSocket from "../../services/useSocket";
-
-const peerConnectionConfig = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-};
 
 // NOTE: Look into SFU's for scaling/multiple user streams
 
 export default function RoomContainer() {
-  const { roomId } = useParams();
-  const location = useLocation();
+  const { stream, streamReady, localVideoRef } = useMediaStream();
+  const { peerConnectionRef } = usePeerConnection();
+  const { roomId, isHost, userIdRef } = useRoomState();
   const socket = useSocket();
 
   const [readyForIce, setReadyForIce] = React.useState();
-  const [stream, setStream] = React.useState(null);
-  const [streamReady, setStreamReady] = React.useState(false);
 
-  const localVideoRef = React.useRef();
-  const peerConnectionRef = React.useRef(null);
   const remoteVideoRef = React.useRef();
-
-  const isHost = location.state?.isHost || false;
-  const userIdRef = React.useRef(Math.random().toString(36).substring(2, 15));
-
-  React.useEffect(() => {
-    peerConnectionRef.current = new RTCPeerConnection(peerConnectionConfig);
-
-    return () => {
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-      }
-    };
-  }, []);
-
-  React.useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((mediaStream) => {
-        setStream(mediaStream);
-        setStreamReady(true);
-      });
-  }, []);
-
-  React.useEffect(() => {
-    if (localVideoRef.current && streamReady) {
-      localVideoRef.current.srcObject = stream;
-    }
-  }, [streamReady]);
 
   React.useEffect(() => {
     socket && socket.emit("joinRoom", roomId);
