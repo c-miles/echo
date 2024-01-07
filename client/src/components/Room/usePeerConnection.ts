@@ -1,19 +1,17 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 
-const peerConnectionConfig = {
+const peerConnectionConfig: RTCConfiguration = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
 export default function usePeerConnection() {
-  const peerConnectionRef = React.useRef(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     peerConnectionRef.current = new RTCPeerConnection(peerConnectionConfig);
 
     return () => {
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.close();
-      }
+      peerConnectionRef.current?.close();
     };
   }, []);
 

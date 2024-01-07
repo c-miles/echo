@@ -1,8 +1,6 @@
-import React from "react";
 import { RoomsProps } from "./types";
 
 function Rooms({ createRoom, joinRoom, rooms }: RoomsProps) {
-  console.log(rooms);
   return (
     <div>
       {rooms &&
