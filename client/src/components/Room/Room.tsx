@@ -1,4 +1,4 @@
-import React, { useEffect, RefObject, CSSProperties } from "react";
+import React, { CSSProperties, useEffect, RefObject } from "react";
 
 type RoomProps = {
   localVideoRef: RefObject<HTMLVideoElement>;
@@ -11,22 +11,7 @@ const Room: React.FC<RoomProps> = ({
   remoteVideoRef,
   remoteStream,
 }) => {
-  const videoContainerStyle: CSSProperties = {
-    display: "flex",
-    justifyContent:
-      remoteStream && remoteStream.active ? "space-evenly" : "center",
-    alignItems: "center",
-    height: "100vh",
-    width: "100%",
-    padding: "20px",
-    boxSizing: "border-box",
-  };
-
-  const videoStyle: CSSProperties = {
-    width: "400px",
-    height: "300px",
-    objectFit: "cover",
-  };
+  const styles = useStyles();
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream?.active) {
@@ -38,19 +23,40 @@ const Room: React.FC<RoomProps> = ({
   }, [remoteVideoRef, remoteStream]);
 
   return (
-    <div style={videoContainerStyle}>
+    <div
+      style={{
+        ...styles.videoContainerStyle,
+        justifyContent: remoteStream?.active ? "space-evenly" : "center",
+      }}
+    >
       <video
         ref={localVideoRef}
-        style={videoStyle}
+        style={styles.videoStyle}
         autoPlay
         muted
         playsInline
       />
       {remoteStream?.active && (
-        <video ref={remoteVideoRef} style={videoStyle} autoPlay playsInline />
+        <video ref={remoteVideoRef} style={styles.videoStyle} autoPlay playsInline />
       )}
     </div>
   );
 };
 
 export default Room;
+
+const useStyles = (): { [key: string]: React.CSSProperties } => ({
+  videoContainerStyle: {
+    display: "flex",
+    alignItems: "center",
+    height: "100vh",
+    width: "100%",
+    padding: "20px",
+    boxSizing: "border-box",
+  },
+  videoStyle: {
+    width: "400px",
+    height: "300px",
+    objectFit: "cover",
+  },
+});
