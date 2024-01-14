@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+import AuthenticationButton from "./components/AuthenticationButton";
+
 function App() {
   let navigate = useNavigate();
 
@@ -24,6 +26,7 @@ function App() {
 
   return (
     <div>
+      <AuthenticationButton />
       <button onClick={sendRequest}>Send Request</button>
       <button onClick={goToChat}>Go to Chat</button>
       <button onClick={goToRooms}>Go to Rooms</button>

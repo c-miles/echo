@@ -37,7 +37,12 @@ const Room: React.FC<RoomProps> = ({
         playsInline
       />
       {remoteStream?.active && (
-        <video ref={remoteVideoRef} style={styles.videoStyle} autoPlay playsInline />
+        <video
+          ref={remoteVideoRef}
+          style={styles.videoStyle}
+          autoPlay
+          playsInline
+        />
       )}
     </div>
   );
@@ -45,7 +50,7 @@ const Room: React.FC<RoomProps> = ({
 
 export default Room;
 
-const useStyles = (): { [key: string]: React.CSSProperties } => ({
+const useStyles = (): { [key: string]: CSSProperties } => ({
   videoContainerStyle: {
     display: "flex",
     alignItems: "center",
