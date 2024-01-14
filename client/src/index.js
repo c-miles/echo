@@ -5,7 +5,6 @@ import { Auth0Provider } from "@auth0/auth0-react";
 
 import "./index.css";
 import App from "./App";
-import Chat from "./components/Chat";
 import Room from "./components/Room";
 import Rooms from "./components/Rooms";
 
@@ -23,7 +22,6 @@ root.render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
-          <Route path="/chat" element={<Chat />} />
           <Route path="/room/:roomId" element={<Room />} />
           <Route path="/rooms" element={<Rooms />} />
         </Routes>
