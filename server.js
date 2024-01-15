@@ -58,6 +58,27 @@ app.post("/create-user", async (req, res) => {
   }
 });
 
+app.put("/user/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    const updates = req.body;
+
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { $set: updates },
+      { new: true }
+    );
+
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.get("/rooms", async (req, res) => {
   try {
     const rooms = await Room.find();
