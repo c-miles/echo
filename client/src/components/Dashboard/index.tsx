@@ -12,14 +12,14 @@ const DashboardContainer: React.FC = () => {
 
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [newUsername, setNewUsername] = useState<string>("");
-  const hasFetchedUserData = useRef(false);
+  const fetchedUserData = useRef(false);
 
   const createUser = useCallback(() => {
     if (!authUser) {
       return;
     }
 
-    fetch("http://localhost:3000/create-user/", {
+    fetch("http://localhost:3000/user/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -27,6 +27,7 @@ const DashboardContainer: React.FC = () => {
       body: JSON.stringify({
         email: authUser.email,
         picture: authUser.picture,
+        id: authUser.sub,
       }),
     })
       .then((res) => res.json())
@@ -39,7 +40,7 @@ const DashboardContainer: React.FC = () => {
       return;
     }
 
-    fetch(`http://localhost:3000/user/${authUser.email}`)
+    fetch(`http://localhost:3000/user/${authUser.sub}`)
       .then((response) => {
         if (response.status === 404) {
           createUser();
@@ -64,7 +65,7 @@ const DashboardContainer: React.FC = () => {
         return;
       }
 
-      fetch(`http://localhost:3000/user/${userInfo.email}`, {
+      fetch(`http://localhost:3000/user/${userInfo.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -82,12 +83,10 @@ const DashboardContainer: React.FC = () => {
     navigate("/rooms");
   };
 
-
   useEffect(() => {
-    if (!userInfo && authUser && !isLoading && !hasFetchedUserData.current) {
-      console.log("fetchUserData called");
+    if (!userInfo && authUser && !isLoading && !fetchedUserData.current) {
       getUserData();
-      hasFetchedUserData.current = true;
+      fetchedUserData.current = true;
     }
   }, [getUserData, authUser, userInfo, isLoading]);
 
