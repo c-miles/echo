@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 import { Room } from "./Room.js";
+import { User } from "./User.js";
 import { socketEvents } from "./socketEvents.js";
 
 dotenv.config();
@@ -28,6 +29,33 @@ socketEvents(io);
 
 app.get("/", (req, res) => {
   res.json({ message: "Hello from Express!" });
+});
+
+app.get("/user/:email", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.post("/create-user", async (req, res) => {
+  try {
+    const { email, picture } = req.body;
+    const newUser = new User({
+      email,
+      picture,
+    });
+    const savedUser = await newUser.save();
+    res.status(201).json(savedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 app.get("/rooms", async (req, res) => {

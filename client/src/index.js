@@ -5,6 +5,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 
 import "./index.css";
 import App from "./App";
+import Dashboard from "./components/Dashboard";
 import Room from "./components/Room";
 import Rooms from "./components/Rooms";
 
@@ -17,11 +18,12 @@ root.render(
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      redirectUri={window.location.origin}
+      authorizationParams={{ redirect_uri: window.location.origin }}
     >
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/room/:roomId" element={<Room />} />
           <Route path="/rooms" element={<Rooms />} />
         </Routes>
