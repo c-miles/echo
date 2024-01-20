@@ -1,4 +1,4 @@
-import { Room } from "./Room.js";
+import { Room } from "../models/Room.js";
 
 export const socketEvents = (io) => {
   io.on("connection", (socket) => {

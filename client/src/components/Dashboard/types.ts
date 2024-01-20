@@ -7,9 +7,10 @@ export interface User {
 }
 
 export interface DashboardProps {
-  userInfo: User | null;
+  createRoom: () => void;
+  handleJoinRoom: (pin: string) => void;
   handleUsernameSubmit: (e: React.FormEvent) => void;
-  handleGoToRooms: () => void;
   newUsername: string;
   setNewUsername: React.Dispatch<React.SetStateAction<string>>;
+  userInfo: User | null;
 }

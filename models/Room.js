@@ -7,6 +7,7 @@ const ParticipantSchema = new mongoose.Schema({
 
 const RoomSchema = new mongoose.Schema({
   roomId: String,
+  pin: String,
   participants: [ParticipantSchema],
   createdAt: { type: Date, default: Date.now },
 });

@@ -12,6 +12,7 @@ const DashboardContainer: React.FC = () => {
 
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [newUsername, setNewUsername] = useState<string>("");
+
   const fetchedUserData = useRef(false);
 
   const createUser = useCallback(() => {
@@ -79,10 +80,6 @@ const DashboardContainer: React.FC = () => {
     [newUsername, userInfo]
   );
 
-  const handleGoToRooms = () => {
-    navigate("/rooms");
-  };
-
   useEffect(() => {
     if (!userInfo && authUser && !isLoading && !fetchedUserData.current) {
       getUserData();
@@ -90,9 +87,47 @@ const DashboardContainer: React.FC = () => {
     }
   }, [getUserData, authUser, userInfo, isLoading]);
 
+  const createRoom = () => {
+    fetch("http://localhost:3000/rooms/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data: { roomId: string; pin: string }) => {
+        console.log(data.pin); // TODO: remove me when pin is accessible
+        navigate(`/room/${data.roomId}`, {
+          state: { isHost: true, pin: data.pin },
+        });
+      })
+      .catch((error) => {
+        console.error("Error creating room:", error);
+      });
+  };
+
+  const handleJoinRoom = useCallback(
+    (pin: string) => {
+      fetch(`http://localhost:3000/rooms/find-by-pin/${pin}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.roomId) {
+            navigate(`/room/${data.roomId}`);
+          } else {
+            // Handle case where no room is found
+          }
+        })
+        .catch((error) => {
+          console.error("Error joining room:", error);
+        });
+    },
+    [navigate]
+  );
+
   return (
     <Dashboard
-      handleGoToRooms={handleGoToRooms}
+      createRoom={createRoom}
+      handleJoinRoom={handleJoinRoom}
       handleUsernameSubmit={handleUsernameSubmit}
       newUsername={newUsername}
       setNewUsername={setNewUsername}
