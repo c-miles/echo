@@ -1,17 +1,11 @@
 import React, { CSSProperties } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { useAuth0 } from "@auth0/auth0-react";
 import AuthenticationButton from "./AuthenticationButton";
 
 const LandingPage: React.FC = () => {
-  const navigate = useNavigate();
   const { isAuthenticated } = useAuth0();
   const styles = useStyles();
-
-  const handleGoToDashboard = () => {
-    navigate("/dashboard");
-  };
 
   return (
     <div style={styles.container}>
@@ -21,11 +15,7 @@ const LandingPage: React.FC = () => {
         solution.
       </p>
 
-      {!isAuthenticated ? (
-        <AuthenticationButton />
-      ) : (
-        <button onClick={handleGoToDashboard}>Go to Your Dashboard</button>
-      )}
+      {!isAuthenticated && <AuthenticationButton />}
     </div>
   );
 };

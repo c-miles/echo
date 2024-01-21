@@ -1,19 +1,24 @@
 import React from "react";
-import { useAuth0, LogoutOptions } from "@auth0/auth0-react";
+import { RedirectLoginOptions, useAuth0 } from "@auth0/auth0-react";
+import Button from "@mui/material/Button";
 
 const AuthenticationButton: React.FC = () => {
-  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+  const { isAuthenticated, loginWithRedirect } = useAuth0();
 
-  return isAuthenticated ? (
-    <button
-      onClick={() =>
-        logout({ returnTo: window.location.origin } as LogoutOptions)
-      }
-    >
-      Logout
-    </button>
-  ) : (
-    <button onClick={() => loginWithRedirect()}>Login</button>
+  if (isAuthenticated) {
+    return null;
+  }
+
+  const handleLogin = () => {
+    loginWithRedirect({
+      redirectUri: "http://localhost:3001/dashboard",
+    } as RedirectLoginOptions);
+  };
+
+  return (
+    <Button variant="contained" onClick={handleLogin}>
+      Login
+    </Button>
   );
 };
 
