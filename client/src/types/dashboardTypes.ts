@@ -1,10 +1,4 @@
-export interface User {
-  id: string;
-  createdAt: Date;
-  email: string;
-  picture: string;
-  username?: string;
-}
+import { User } from "./userTypes";
 
 export interface DashboardProps {
   createRoom: () => void;

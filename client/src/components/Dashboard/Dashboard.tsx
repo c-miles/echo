@@ -1,6 +1,6 @@
 import React, { CSSProperties, useState } from "react";
 import { BeatLoader } from "react-spinners";
-import { DashboardProps } from "./types";
+import { DashboardProps } from "../../types/dashboardTypes";
 
 import { Box, Button, FormControl, TextField, Typography } from "@mui/material";
 import { Close, MeetingRoom, VideoCall } from "@mui/icons-material";
