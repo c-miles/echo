@@ -36,16 +36,35 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    if (updates.username) {
+      updates.usernameLower = updates.username.toLowerCase();
+    }
+
     const user = await User.findOneAndUpdate(
       { id: id },
       { $set: updates },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (user) {
       res.json(user);
     } else {
       res.status(404).send("User not found");
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/check-username/:username", async (req, res) => {
+  try {
+    const usernameLower = req.params.username.toLowerCase();
+    const user = await User.findOne({ usernameLower: usernameLower });
+
+    if (user) {
+      res.json({ available: false });
+    } else {
+      res.json({ available: true });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

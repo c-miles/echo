@@ -12,6 +12,7 @@ const DashboardContainer: React.FC = () => {
 
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [newUsername, setNewUsername] = useState<string>("");
+  const [usernameError, setUsernameError] = useState<string>("");
 
   const fetchedUserData = useRef(false);
 
@@ -59,25 +60,71 @@ const DashboardContainer: React.FC = () => {
       .catch((error) => console.error("Error fetching user data:", error));
   }, [createUser, authUser, userInfo]);
 
+  const validateUsername = (username: string): string => {
+    const regex = /^[a-zA-Z0-9_]+$/;
+
+    if (!regex.test(username)) {
+      return "Username can only contain letters, numbers, and underscores";
+    }
+    if (username.length < 3 || username.length > 30) {
+      return "Username must be between 3 and 20 characters long";
+    }
+    return "";
+  };
+
+  const checkUsernameAvailability = useCallback(async (username: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/user/check-username/${username}`
+      );
+      const data = await response.json();
+      return data.available;
+    } catch (error) {
+      console.error("Error checking username availability:", error);
+      return false;
+    }
+  }, []);
+
   const handleUsernameSubmit = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
+
+      if (!userInfo) return;
+
       e.preventDefault();
-      if (!userInfo) {
+      const validationError = validateUsername(newUsername);
+      if (validationError) {
+        setUsernameError(validationError);
+        return;
+      }
+
+      const isAvailable = await checkUsernameAvailability(newUsername);
+      console.log(isAvailable);
+      if (!isAvailable) {
+        setUsernameError("Username is already taken");
         return;
       }
 
       fetch(`http://localhost:3000/user/${userInfo.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: newUsername }),
       })
-        .then((response) => response.json())
-        .then((data) => setUserInfo(data))
-        .catch((error) => console.error("Error updating user data:", error));
+        .then((response) => {
+          if (!response.ok) {
+            console.log(response);
+            throw new Error("Username already taken or invalid");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setUserInfo(data);
+          setUsernameError("");
+        })
+        .catch((error) => {
+          setUsernameError(error.message);
+        });
     },
-    [newUsername, userInfo]
+    [checkUsernameAvailability, newUsername, userInfo]
   );
 
   useEffect(() => {
@@ -131,6 +178,7 @@ const DashboardContainer: React.FC = () => {
       handleUsernameSubmit={handleUsernameSubmit}
       newUsername={newUsername}
       setNewUsername={setNewUsername}
+      usernameError={usernameError}
       userInfo={userInfo}
     />
   );

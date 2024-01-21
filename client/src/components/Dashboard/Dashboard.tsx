@@ -12,6 +12,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   newUsername,
   setNewUsername,
   userInfo,
+  usernameError,
 }) => {
   const styles = useStyles();
 
@@ -37,6 +38,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           style={styles.formControl}
         >
           <TextField
+            error={!!usernameError}
+            helperText={usernameError}
             type="text"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
