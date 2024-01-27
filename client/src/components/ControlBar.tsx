@@ -3,24 +3,23 @@ import React, { useState, CSSProperties } from "react";
 import { Box, IconButton, AppBar } from "@mui/material";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 
-type ControlBarProps = {
-  toggleMessages: () => void;
-};
+import { ControlBarProps } from "../types/controlBarTypes";
 
-const ControlBar: React.FC<ControlBarProps> = ({ toggleMessages }) => {
-  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+const ControlBar: React.FC<ControlBarProps> = ({ toggleMessageThread }) => {
   const styles = useControlBarStyles();
 
+  const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
+
   const handleChevronClick = () => {
-    setIsMessagesOpen(!isMessagesOpen);
-    toggleMessages();
+    setIsMessageThreadOpen(!isMessageThreadOpen);
+    toggleMessageThread();
   };
 
   return (
     <AppBar position="static" style={styles.container}>
       <Box style={styles.box}>
         <IconButton onClick={handleChevronClick} style={styles.chevron}>
-          {isMessagesOpen ? (
+          {isMessageThreadOpen ? (
             <KeyboardArrowDown style={styles.icon} />
           ) : (
             <KeyboardArrowUp style={styles.icon} />

@@ -1,6 +1,7 @@
 import React, { CSSProperties, useEffect, useState, RefObject } from "react";
 
 import ControlBar from "../ControlBar";
+import MessageThread from "../MessageThread";
 
 type RoomProps = {
   localVideoRef: RefObject<HTMLVideoElement>;
@@ -24,11 +25,10 @@ const Room: React.FC<RoomProps> = ({
     }
   }, [remoteVideoRef, remoteStream]);
 
-  // TODO: Implement the following state and function
-  const [showMessages, setShowMessages] = useState(false);
+  const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
 
-  const toggleMessages = () => {
-    setShowMessages(!showMessages);
+  const toggleMessageThread = () => {
+    setIsMessageThreadOpen(!isMessageThreadOpen);
   };
 
   return (
@@ -53,7 +53,8 @@ const Room: React.FC<RoomProps> = ({
           playsInline
         />
       )}
-      <ControlBar toggleMessages={toggleMessages} />
+      {isMessageThreadOpen && <MessageThread />}
+      <ControlBar toggleMessageThread={toggleMessageThread} />
     </div>
   );
 };
