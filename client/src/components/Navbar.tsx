@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { CSSProperties, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
   Avatar,
+  Box,
+  IconButton,
   Menu,
   MenuItem,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 
 import { useAuth0 } from "@auth0/auth0-react";
@@ -16,6 +17,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth0();
   const navigate = useNavigate();
+  const styles = useStyles();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -27,12 +29,23 @@ const Navbar: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const navigateToDashboard = () => {
+    navigate("/dashboard");
+  };
+
   return (
-    <AppBar position="static" style={{ backgroundColor: "#424242" }}>
+    <AppBar position="static" style={styles.container}>
       <Toolbar>
-        <Typography variant="h6" style={{ flexGrow: 1 }}>
-          Echo
-        </Typography>
+        <Box style={styles.box}>
+          <Typography variant="h6">Echo</Typography>
+          <Typography
+            variant="h6"
+            style={styles.lounge}
+            onClick={navigateToDashboard}
+          >
+            Lounge
+          </Typography>
+        </Box>
         {user && (
           <>
             <IconButton onClick={handleMenu} size="large">
@@ -54,3 +67,18 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
+const useStyles = (): { [key: string]: CSSProperties } => ({
+  container: {
+    backgroundColor: "#424242",
+  },
+  box: {
+    display: "flex",
+    alignItems: "center",
+    flexGrow: 1,
+  },
+  lounge: {
+    cursor: "pointer",
+    marginLeft: "3%",
+  },
+});
