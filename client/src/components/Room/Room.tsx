@@ -1,18 +1,15 @@
-import React, { CSSProperties, useEffect, useState, RefObject } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
-
-type RoomProps = {
-  localVideoRef: RefObject<HTMLVideoElement>;
-  remoteVideoRef: RefObject<HTMLVideoElement>;
-  remoteStream: MediaStream | null;
-};
+import { RoomProps } from "../../types/roomTypes";
 
 const Room: React.FC<RoomProps> = ({
   localVideoRef,
-  remoteVideoRef,
   remoteStream,
+  remoteVideoRef,
+  roomId,
+  userId,
 }) => {
   const styles = useStyles();
 
@@ -53,7 +50,7 @@ const Room: React.FC<RoomProps> = ({
           playsInline
         />
       )}
-      {isMessageThreadOpen && <MessageThread />}
+      {isMessageThreadOpen && <MessageThread roomId={roomId} userId={userId} />}
       <ControlBar toggleMessageThread={toggleMessageThread} />
     </div>
   );

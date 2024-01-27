@@ -1,24 +1,40 @@
 import React, { useState, useEffect } from "react";
 
-import { Message } from "../../types/messageTypes"; 
+import { Message } from "../../types/messageTypes";
 import MessageThread from "./MessageThread";
 import useSocket from "../../services/useSocket";
 
-const MessageThreadContainer: React.FC = () => {
+const MessageThreadContainer: React.FC<{
+  roomId: string | undefined;
+  userId: string | undefined;
+}> = ({ roomId, userId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const socket = useSocket();
 
   useEffect(() => {
-    socket?.on("receiveMessage", (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
+    if (socket) {
+      socket.emit("joinRoom", roomId);
 
-    return () => {
-      socket?.off("receiveMessage");
-    };
-  }, [socket]);
+      socket.on("roomMessages", (roomMessages) => {
+        setMessages(roomMessages);
+      });
 
-  const handleSendMessage = (message: string) => {
+      socket.on("receiveMessage", (message) => {
+        setMessages((prevMessages) => [...prevMessages, message]);
+      });
+
+      return () => {
+        socket.off("receiveMessage");
+        socket.off("roomMessages");
+      };
+    }
+  }, [socket, roomId]);
+
+  const handleSendMessage = (messageContent: string) => {
+    if (messageContent.trim()) {
+      const message = { roomId, userId, message: messageContent };
+      socket?.emit("sendMessage", message);
+    }
   };
 
   return (

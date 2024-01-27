@@ -124,8 +124,10 @@ const RoomContainer: React.FC = () => {
   return (
     <Room
       localVideoRef={localVideoRef}
-      remoteVideoRef={remoteVideoRef}
       remoteStream={remoteStream}
+      remoteVideoRef={remoteVideoRef}
+      roomId={roomId}
+      userId={userIdRef.current}
     />
   );
 };
