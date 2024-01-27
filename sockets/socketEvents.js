@@ -1,21 +1,24 @@
+import { Message } from "../models/Message.js";
 import { Room } from "../models/Room.js";
 
 export const socketEvents = (io) => {
   io.on("connection", (socket) => {
-    console.log("a user connected");
-
     socket.on("disconnect", () => {
       console.log("user disconnected");
     });
 
-    socket.on("joinRoom", (roomId) => {
+    socket.on("joinRoom", async (roomId) => {
       socket.join(roomId);
+      const messages = await Message.find({ roomId }).sort({ timestamp: 1 });
+
+      socket.emit("roomMessages", messages);
     });
 
-    // NOTE: Delete this after initial config is complete
-    socket.on("sendMessage", (msg) => {
-      console.log("Received message:", msg);
-      io.emit("receiveMessage", msg);
+    socket.on("sendMessage", async ({ roomId, userId, message }) => {
+      const newMessage = new Message({ roomId, userId, message });
+      await newMessage.save();
+
+      socket.to(roomId).emit("receiveMessage", newMessage);
     });
 
     socket.on("sendOffer", async ({ roomId, userId, sdp }) => {
@@ -33,6 +36,7 @@ export const socketEvents = (io) => {
             room.participants.push({ userId, sdp });
           }
           await room.save();
+
           io.to(roomId).emit("offerAvailable", { userId, sdp });
         }
       } catch (error) {
@@ -46,6 +50,7 @@ export const socketEvents = (io) => {
         if (room && room.participants.length > 0) {
           // Assuming the host is the first participant
           const hostSdp = room.participants[0].sdp;
+
           socket.emit("receiveOffer", { sdp: hostSdp });
         }
       } catch (error) {
