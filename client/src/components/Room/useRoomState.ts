@@ -11,6 +11,8 @@ export default function useRoomState() {
   const state = location.state as LocationState;
 
   const isHost = state?.isHost || false;
+
+  // TODO: Switch this to user's auth0 id
   const userIdRef = useRef<string>(Math.random().toString(36).substring(2, 15));
 
   return { roomId, isHost, userIdRef };

@@ -19,8 +19,17 @@ const MessageThreadContainer: React.FC<{
         setMessages(roomMessages);
       });
 
-      socket.on("receiveMessage", (message) => {
-        setMessages((prevMessages) => [...prevMessages, message]);
+      socket.on("receiveMessage", (receivedMessage) => {
+        setMessages((prevMessages) => {
+          if (
+            prevMessages.some(
+              (msg) => msg.timestamp === receivedMessage.timestamp
+            )
+          ) {
+            return prevMessages;
+          }
+          return [...prevMessages, receivedMessage];
+        });
       });
 
       return () => {
@@ -31,9 +40,15 @@ const MessageThreadContainer: React.FC<{
   }, [socket, roomId]);
 
   const handleSendMessage = (messageContent: string) => {
-    if (messageContent.trim()) {
-      const message = { roomId, userId, message: messageContent };
-      socket?.emit("sendMessage", message);
+    if (messageContent.trim() && roomId && userId) {
+      const newMessage = {
+        roomId,
+        userId,
+        message: messageContent,
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      socket?.emit("sendMessage", newMessage);
     }
   };
 
