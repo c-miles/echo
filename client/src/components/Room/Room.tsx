@@ -1,4 +1,6 @@
-import React, { CSSProperties, useEffect, RefObject } from "react";
+import React, { CSSProperties, useEffect, useState, RefObject } from "react";
+
+import ControlBar from "../ControlBar";
 
 type RoomProps = {
   localVideoRef: RefObject<HTMLVideoElement>;
@@ -22,6 +24,13 @@ const Room: React.FC<RoomProps> = ({
     }
   }, [remoteVideoRef, remoteStream]);
 
+  // TODO: Implement the following state and function
+  const [showMessages, setShowMessages] = useState(false);
+
+  const toggleMessages = () => {
+    setShowMessages(!showMessages);
+  };
+
   return (
     <div
       style={{
@@ -44,6 +53,7 @@ const Room: React.FC<RoomProps> = ({
           playsInline
         />
       )}
+      <ControlBar toggleMessages={toggleMessages} />
     </div>
   );
 };
