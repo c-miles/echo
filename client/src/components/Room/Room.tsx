@@ -12,6 +12,7 @@ const Room: React.FC<RoomProps> = ({
   remoteVideoRef,
   roomId,
   userId,
+  username,
 }) => {
   const styles = useStyles();
 
@@ -54,7 +55,7 @@ const Room: React.FC<RoomProps> = ({
       )}
       <Box sx={styles.threadContainer}>
         {isMessageThreadOpen && (
-          <MessageThread roomId={roomId} userId={userId} />
+          <MessageThread roomId={roomId} userId={userId} username={username} />
         )}
       </Box>
       <ControlBar toggleMessageThread={toggleMessageThread} />

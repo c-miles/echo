@@ -1,7 +1,8 @@
 export interface Message {
-  userId: string;
   message: string;
   timestamp: Date;
+  userId: string;
+  username: string;
 }
 
 export type MessageThreadProps = {

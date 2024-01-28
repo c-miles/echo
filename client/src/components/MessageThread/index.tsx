@@ -7,7 +7,8 @@ import useSocket from "../../services/useSocket";
 const MessageThreadContainer: React.FC<{
   roomId: string | undefined;
   userId: string | undefined;
-}> = ({ roomId, userId }) => {
+  username: string | undefined;
+}> = ({ roomId, userId, username }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const socket = useSocket();
 
@@ -40,10 +41,12 @@ const MessageThreadContainer: React.FC<{
   }, [socket, roomId]);
 
   const handleSendMessage = (messageContent: string) => {
-    if (messageContent.trim() && roomId && userId) {
+    if (messageContent.trim() && roomId && userId && username) {
+      // TODO: Eliminate all these checks
       const newMessage = {
         roomId,
         userId,
+        username,
         message: messageContent,
         timestamp: new Date(),
       };

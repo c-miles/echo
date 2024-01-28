@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import Room from "./Room";
 
+import useAuthUser from "../../hooks/useAuthUser";
 import useMediaStream from "./useMediaStream";
 import usePeerConnection from "./usePeerConnection";
 import useRoomState from "./useRoomState";
 import useSocket from "../../services/useSocket";
 
 const RoomContainer: React.FC = () => {
+  const { userInfo } = useAuthUser();
   const { stream, streamReady, localVideoRef } = useMediaStream();
   const { peerConnectionRef } = usePeerConnection();
   const { roomId, isHost, userIdRef } = useRoomState();
@@ -127,6 +129,7 @@ const RoomContainer: React.FC = () => {
       remoteStream={remoteStream}
       remoteVideoRef={remoteVideoRef}
       roomId={roomId}
+      username={userInfo?.username}
       userId={userIdRef.current}
     />
   );

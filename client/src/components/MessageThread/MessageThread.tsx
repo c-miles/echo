@@ -6,7 +6,6 @@ import { MessageThreadProps } from "../../types/messageTypes";
 const MessageThread: React.FC<MessageThreadProps> = ({
   messages,
   onSendMessage,
-  style,
 }) => {
   const styles = useStyles();
 
@@ -32,7 +31,7 @@ const MessageThread: React.FC<MessageThreadProps> = ({
       <List ref={listRef} style={styles.list}>
         {messages.map((msg, index) => (
           <ListItem key={index} style={styles.listItem}>
-            {msg.message}
+            {`${msg.username}: ${msg.message}`}
           </ListItem>
         ))}
       </List>
