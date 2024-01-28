@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Box, List, ListItem, TextField, Button } from "@mui/material";
-import { MessageThreadProps } from "../../types/messageTypes"; 
+import { Box, List, ListItem, TextField } from "@mui/material";
+import { MessageThreadProps } from "../../types/messageTypes";
 
 const MessageThread: React.FC<MessageThreadProps> = ({
   messages,
@@ -9,9 +9,12 @@ const MessageThread: React.FC<MessageThreadProps> = ({
 }) => {
   const [newMessage, setNewMessage] = React.useState("");
 
-  const handleSend = () => {
-    onSendMessage(newMessage);
-    setNewMessage("");
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      onSendMessage(newMessage);
+      setNewMessage("");
+    }
   };
 
   return (
@@ -22,12 +25,12 @@ const MessageThread: React.FC<MessageThreadProps> = ({
         ))}
       </List>
       <TextField
-        value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
-        placeholder="Type a message"
         fullWidth
+        onChange={(e) => setNewMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Type a message"
+        value={newMessage}
       />
-      <Button onClick={handleSend}>Send</Button>
     </Box>
   );
 };
