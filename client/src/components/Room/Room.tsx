@@ -11,7 +11,6 @@ const Room: React.FC<RoomProps> = ({
   remoteStream,
   remoteVideoRef,
   roomId,
-  userId,
   username,
 }) => {
   const styles = useStyles();
@@ -55,7 +54,7 @@ const Room: React.FC<RoomProps> = ({
       )}
       <Box sx={styles.threadContainer}>
         {isMessageThreadOpen && (
-          <MessageThread roomId={roomId} userId={userId} username={username} />
+          <MessageThread roomId={roomId} username={username} />
         )}
       </Box>
       <ControlBar toggleMessageThread={toggleMessageThread} />
@@ -70,7 +69,7 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
     display: "flex",
     alignItems: "center",
     boxSizing: "border-box",
-    height: "calc(100vh - 64px)",
+    height: "calc(100vh - 64px)", // NOTE: height of Navbar
   },
   threadContainer: {
     position: "absolute",

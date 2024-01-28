@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
 
 const MessageSchema = new mongoose.Schema({
-  roomId: String,
-  userId: String,
-  username: String,
   message: String,
+  roomId: String,
+  username: String,
   timestamp: { type: Date, default: Date.now },
 });
 

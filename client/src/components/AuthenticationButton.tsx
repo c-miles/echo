@@ -16,7 +16,7 @@ const AuthenticationButton: React.FC = () => {
   };
 
   return (
-    <Button variant="contained" onClick={handleLogin}>
+    <Button variant="contained" onClick={handleLogin} sx={{ backgroundColor: "#424242"}}>
       Login
     </Button>
   );

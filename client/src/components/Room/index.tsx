@@ -130,7 +130,6 @@ const RoomContainer: React.FC = () => {
       remoteVideoRef={remoteVideoRef}
       roomId={roomId}
       username={userInfo?.username}
-      userId={userIdRef.current}
     />
   );
 };

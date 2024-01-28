@@ -43,6 +43,13 @@ const MessageThread: React.FC<MessageThreadProps> = ({
         onChange={(e) => setNewMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type a message"
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            "&.Mui-focused fieldset": {
+              borderColor: "white",
+            },
+          },
+        }}
         value={newMessage}
       />
     </Box>
@@ -55,12 +62,13 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
   container: {
     backgroundColor: "#424242",
     width: 300,
+    borderRadius: '15px 0 0 0',
   },
   input: {
     color: "#FFFFFF",
   },
   list: {
-    height: "calc(100vh - 178px)",
+    height: "70vh",
     marginBottom: "1%",
     overflowY: "auto",
   },

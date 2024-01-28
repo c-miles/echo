@@ -14,8 +14,8 @@ export const socketEvents = (io) => {
       socket.emit("roomMessages", messages);
     });
 
-    socket.on("sendMessage", async ({ roomId, userId, message }) => {
-      const newMessage = new Message({ roomId, userId, message });
+    socket.on("sendMessage", async ({ message, roomId, username }) => {
+      const newMessage = new Message({ message, roomId, username });
       await newMessage.save();
 
       socket.to(roomId).emit("receiveMessage", newMessage);

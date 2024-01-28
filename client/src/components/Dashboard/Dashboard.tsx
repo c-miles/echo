@@ -129,13 +129,14 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
     display: "flex",
     alignItems: "center",
     flexDirection: "column",
-    height: "100vh",
+    height: "calc(100vh - 64px)",
     justifyContent: "center",
     position: "relative",
   },
   button: {
     width: 120,
     height: 120,
+    backgroundColor: "#424242",
   },
   closeButton: {
     backgroundColor: "transparent",

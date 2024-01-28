@@ -6,5 +6,4 @@ export type RoomProps = {
   remoteStream: MediaStream | null;
   roomId: string | undefined;
   username: string | undefined;
-  userId: string | undefined;
 };
