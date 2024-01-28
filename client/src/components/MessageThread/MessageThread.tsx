@@ -6,6 +6,7 @@ import { MessageThreadProps } from "../../types/messageTypes";
 const MessageThread: React.FC<MessageThreadProps> = ({
   messages,
   onSendMessage,
+  style,
 }) => {
   const styles = useStyles();
 
@@ -27,14 +28,19 @@ const MessageThread: React.FC<MessageThreadProps> = ({
   }, [messages]);
 
   return (
-    <Box>
+    <Box style={styles.container}>
       <List ref={listRef} style={styles.list}>
         {messages.map((msg, index) => (
-          <ListItem key={index}>{msg.message}</ListItem>
+          <ListItem key={index} style={styles.listItem}>
+            {msg.message}
+          </ListItem>
         ))}
       </List>
       <TextField
         fullWidth
+        InputProps={{
+          style: styles.input,
+        }}
         onChange={(e) => setNewMessage(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type a message"
@@ -47,9 +53,19 @@ const MessageThread: React.FC<MessageThreadProps> = ({
 export default MessageThread;
 
 const useStyles = (): { [key: string]: CSSProperties } => ({
+  container: {
+    backgroundColor: "#424242",
+    width: 300,
+  },
+  input: {
+    color: "#FFFFFF",
+  },
   list: {
-    height: 300,
-    marginBottom: "2%",
+    height: "calc(100vh - 178px)",
+    marginBottom: "1%",
     overflowY: "auto",
+  },
+  listItem: {
+    color: "#FFFFFF",
   },
 });

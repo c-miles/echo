@@ -1,5 +1,7 @@
 import React, { CSSProperties, useEffect, useState } from "react";
 
+import { Box } from "@mui/material";
+
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
 import { RoomProps } from "../../types/roomTypes";
@@ -29,9 +31,9 @@ const Room: React.FC<RoomProps> = ({
   };
 
   return (
-    <div
-      style={{
-        ...styles.videoContainerStyle,
+    <Box
+      sx={{
+        ...styles.container,
         justifyContent: remoteStream?.active ? "space-evenly" : "center",
       }}
     >
@@ -50,22 +52,29 @@ const Room: React.FC<RoomProps> = ({
           playsInline
         />
       )}
-      {isMessageThreadOpen && <MessageThread roomId={roomId} userId={userId} />}
+      <Box sx={styles.threadContainer}>
+        {isMessageThreadOpen && (
+          <MessageThread roomId={roomId} userId={userId} />
+        )}
+      </Box>
       <ControlBar toggleMessageThread={toggleMessageThread} />
-    </div>
+    </Box>
   );
 };
 
 export default Room;
 
 const useStyles = (): { [key: string]: CSSProperties } => ({
-  videoContainerStyle: {
+  container: {
     display: "flex",
     alignItems: "center",
-    height: "100vh",
-    width: "100%",
-    padding: "20px",
     boxSizing: "border-box",
+    height: "calc(100vh - 64px)",
+  },
+  threadContainer: {
+    position: "absolute",
+    bottom: 40, // NOTE: height of ControlBar
+    right: 0,
   },
   videoStyle: {
     width: "400px",
