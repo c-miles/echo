@@ -13,6 +13,7 @@ const Room: React.FC<RoomProps> = ({
   roomId,
   toggleVideo,
   username,
+  userPicture,
   videoEnabled,
 }) => {
   const styles = useStyles();
@@ -33,25 +34,34 @@ const Room: React.FC<RoomProps> = ({
   };
 
   return (
-    <Box
-      sx={{
+    <div
+      style={{
         ...styles.container,
         justifyContent: remoteStream?.active ? "space-evenly" : "center",
       }}
     >
       <video
-        ref={localVideoRef}
-        style={styles.videoStyle}
         autoPlay
         muted
         playsInline
+        ref={localVideoRef}
+        style={{ ...styles.videoStyle, display: !videoEnabled ? "none" : "" }}
       />
+      <Box style={{ flexGrow: 1, display: videoEnabled ? "none" : "" }}>
+        <Box style={styles.imageContainer}>
+          <img
+            alt="Profile Pic"
+            src={userPicture}
+            style={styles.profileImage}
+          />
+        </Box>
+      </Box>
       {remoteStream?.active && (
         <video
-          ref={remoteVideoRef}
-          style={styles.videoStyle}
           autoPlay
           playsInline
+          ref={remoteVideoRef}
+          style={styles.videoStyle}
         />
       )}
       <Box sx={styles.threadContainer}>
@@ -65,7 +75,7 @@ const Room: React.FC<RoomProps> = ({
         toggleVideo={toggleVideo}
         videoEnabled={videoEnabled}
       />
-    </Box>
+    </div>
   );
 };
 
@@ -75,9 +85,25 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
   container: {
     display: "flex",
     alignItems: "center",
+    justifyItems: "center",
     boxSizing: "border-box",
     height: "calc(100vh - 64px)", // NOTE: height of Navbar
-    justifyContent: "flex-start",
+    margin: "0 auto",
+    width: "100vw",
+  },
+  hidden: {
+    display: "none",
+  },
+  imageContainer: {
+    display: "flex",
+    justifyContent: "center",
+    width: "100%",
+  },
+  profileImage: {
+    height: "300px",
+    objectFit: "inherit",
+    objectPosition: "center",
+    width: "400px",
   },
   threadContainer: {
     bottom: -4,
@@ -85,8 +111,8 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
     position: "relative",
   },
   videoStyle: {
-    flexGrow: 1,
     height: "300px",
     width: "400px",
+    flexGrow: 1,
   },
 });

@@ -7,5 +7,6 @@ export type RoomProps = {
   roomId: string | undefined;
   toggleVideo: () => void;
   username: string | undefined;
+  userPicture: string | undefined;
   videoEnabled: boolean;
 };

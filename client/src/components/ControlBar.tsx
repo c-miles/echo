@@ -1,6 +1,6 @@
 import React, { useState, CSSProperties } from "react";
 
-import { Box, IconButton, AppBar } from "@mui/material";
+import { IconButton, AppBar } from "@mui/material";
 import {
   KeyboardArrowDown,
   KeyboardArrowUp,

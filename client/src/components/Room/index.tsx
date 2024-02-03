@@ -132,6 +132,7 @@ const RoomContainer: React.FC = () => {
       roomId={roomId}
       toggleVideo={toggleVideo}
       username={userInfo?.username}
+      userPicture={userInfo?.picture}
       videoEnabled={videoEnabled}
     />
   );
