@@ -70,15 +70,16 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
     alignItems: "center",
     boxSizing: "border-box",
     height: "calc(100vh - 64px)", // NOTE: height of Navbar
+    justifyContent: "flex-start",
   },
   threadContainer: {
-    position: "absolute",
-    bottom: 40, // NOTE: height of ControlBar
-    right: 0,
+    bottom: -4,
+    marginLeft: "auto",
+    position: "relative",
   },
   videoStyle: {
-    width: "400px",
+    flexGrow: 1,
     height: "300px",
-    objectFit: "cover",
+    width: "400px",
   },
 });
