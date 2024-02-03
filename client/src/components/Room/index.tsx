@@ -9,7 +9,8 @@ import useSocket from "../../services/useSocket";
 
 const RoomContainer: React.FC = () => {
   const { userInfo } = useAuthUser();
-  const { stream, streamReady, localVideoRef } = useMediaStream();
+  const { stream, streamReady, localVideoRef, toggleVideo, videoEnabled } =
+    useMediaStream();
   const { peerConnectionRef } = usePeerConnection();
   const { roomId, isHost, userIdRef } = useRoomState();
   const socket = useSocket();
@@ -129,7 +130,9 @@ const RoomContainer: React.FC = () => {
       remoteStream={remoteStream}
       remoteVideoRef={remoteVideoRef}
       roomId={roomId}
+      toggleVideo={toggleVideo}
       username={userInfo?.username}
+      videoEnabled={videoEnabled}
     />
   );
 };

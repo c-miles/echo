@@ -5,5 +5,7 @@ export type RoomProps = {
   remoteVideoRef: RefObject<HTMLVideoElement>;
   remoteStream: MediaStream | null;
   roomId: string | undefined;
+  toggleVideo: () => void;
   username: string | undefined;
+  videoEnabled: boolean;
 };

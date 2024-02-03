@@ -1,11 +1,20 @@
 import React, { useState, CSSProperties } from "react";
 
 import { Box, IconButton, AppBar } from "@mui/material";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
+import {
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  Videocam,
+  VideocamOff,
+} from "@mui/icons-material";
 
 import { ControlBarProps } from "../types/controlBarTypes";
 
-const ControlBar: React.FC<ControlBarProps> = ({ toggleMessageThread }) => {
+const ControlBar: React.FC<ControlBarProps> = ({
+  toggleMessageThread,
+  toggleVideo,
+  videoEnabled,
+}) => {
   const styles = useControlBarStyles();
 
   const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
@@ -17,15 +26,20 @@ const ControlBar: React.FC<ControlBarProps> = ({ toggleMessageThread }) => {
 
   return (
     <AppBar position="static" style={styles.container}>
-      <Box style={styles.box}>
-        <IconButton onClick={handleChevronClick} style={styles.chevron}>
-          {isMessageThreadOpen ? (
-            <KeyboardArrowDown style={styles.icon} />
-          ) : (
-            <KeyboardArrowUp style={styles.icon} />
-          )}
-        </IconButton>
-      </Box>
+      <IconButton onClick={toggleVideo}>
+        {videoEnabled ? (
+          <Videocam style={styles.icon} />
+        ) : (
+          <VideocamOff style={styles.icon} />
+        )}
+      </IconButton>
+      <IconButton onClick={handleChevronClick} style={styles.threadContainer}>
+        {isMessageThreadOpen ? (
+          <KeyboardArrowDown style={styles.icon} />
+        ) : (
+          <KeyboardArrowUp style={styles.icon} />
+        )}
+      </IconButton>
     </AppBar>
   );
 };
@@ -36,16 +50,13 @@ const useControlBarStyles = (): { [key: string]: CSSProperties } => ({
   container: {
     backgroundColor: "#424242",
     bottom: 0,
+    flexDirection: "row",
+    justifyContent: "center",
     position: "fixed",
-    width: "100%",
   },
-  box: {
-    display: "flex",
-    justifyContent: "flex-end",
-    width: "100%",
-  },
-  chevron: {
-    marginRight: "2%",
+  threadContainer: {
+    position: "absolute",
+    right: "2%",
   },
   icon: {
     color: "white",

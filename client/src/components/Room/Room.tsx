@@ -11,7 +11,9 @@ const Room: React.FC<RoomProps> = ({
   remoteStream,
   remoteVideoRef,
   roomId,
+  toggleVideo,
   username,
+  videoEnabled,
 }) => {
   const styles = useStyles();
 
@@ -57,7 +59,12 @@ const Room: React.FC<RoomProps> = ({
           <MessageThread roomId={roomId} username={username} />
         )}
       </Box>
-      <ControlBar toggleMessageThread={toggleMessageThread} />
+
+      <ControlBar
+        toggleMessageThread={toggleMessageThread}
+        toggleVideo={toggleVideo}
+        videoEnabled={videoEnabled}
+      />
     </Box>
   );
 };

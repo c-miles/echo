@@ -3,6 +3,8 @@ import { useEffect, useState, useRef } from "react";
 export default function useMediaStream() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [streamReady, setStreamReady] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(true);
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -23,5 +25,18 @@ export default function useMediaStream() {
     }
   }, [streamReady, stream]);
 
-  return { stream, streamReady, localVideoRef };
+  const toggleVideo = () => {
+    if (stream) {
+      const videoTrack = stream
+        .getTracks()
+        .find((track) => track.kind === "video");
+
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        setVideoEnabled(videoTrack.enabled);
+      }
+    }
+  };
+
+  return { stream, streamReady, localVideoRef, toggleVideo, videoEnabled };
 }
