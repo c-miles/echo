@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
 interface LocationState {
@@ -15,5 +15,18 @@ export default function useRoomState() {
   // TODO: Switch this to user's auth0 id
   const userIdRef = useRef<string>(Math.random().toString(36).substring(2, 15));
 
-  return { roomId, isHost, userIdRef };
+  const [remoteVideoEnabled, setRemoteVideoEnabled] = useState<boolean>(true);
+  const [remoteUserPicture, setRemoteUserPicture] = useState<
+    string | undefined
+  >(undefined);
+
+  return {
+    isHost,
+    remoteUserPicture,
+    remoteVideoEnabled,
+    roomId,
+    setRemoteUserPicture,
+    setRemoteVideoEnabled,
+    userIdRef,
+  };
 }

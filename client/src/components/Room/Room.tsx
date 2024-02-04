@@ -9,6 +9,8 @@ import { RoomProps } from "../../types/roomTypes";
 const Room: React.FC<RoomProps> = ({
   localVideoRef,
   remoteStream,
+  remoteUserPicture,
+  remoteVideoEnabled,
   remoteVideoRef,
   roomId,
   toggleVideo,
@@ -19,13 +21,13 @@ const Room: React.FC<RoomProps> = ({
   const styles = useStyles();
 
   useEffect(() => {
-    if (remoteVideoRef.current && remoteStream?.active) {
+    if (remoteVideoRef.current && remoteStream?.active && remoteVideoEnabled) {
       remoteVideoRef.current.srcObject = remoteStream;
       remoteVideoRef.current
         .play()
         .catch((e) => console.error("Error playing remote video:", e));
     }
-  }, [remoteVideoRef, remoteStream]);
+  }, [remoteVideoRef, remoteStream, remoteVideoEnabled]);
 
   const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
 
@@ -49,20 +51,29 @@ const Room: React.FC<RoomProps> = ({
       />
       <Box style={{ flexGrow: 1, display: videoEnabled ? "none" : "" }}>
         <Box style={styles.imageContainer}>
-          <img
-            alt="Profile Pic"
-            src={userPicture}
-            style={styles.profileImage}
-          />
+          <img alt="Profile Pic" src={userPicture} style={styles.image} />
         </Box>
       </Box>
-      {remoteStream?.active && (
+      {remoteStream?.active && remoteVideoEnabled ? (
         <video
           autoPlay
           playsInline
           ref={remoteVideoRef}
-          style={styles.videoStyle}
+          style={{
+            ...styles.videoStyle,
+            display: !remoteVideoEnabled ? "none" : "",
+          }}
         />
+      ) : (
+        <Box style={{ flexGrow: 1, display: remoteVideoEnabled ? "none" : "" }}>
+          <Box style={styles.imageContainer}>
+            <img
+              alt="Remote User Profile Pic"
+              src={remoteUserPicture}
+              style={styles.image}
+            />
+          </Box>
+        </Box>
       )}
       <Box sx={styles.threadContainer}>
         {isMessageThreadOpen && (
@@ -99,7 +110,7 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
     justifyContent: "center",
     width: "100%",
   },
-  profileImage: {
+  image: {
     height: "300px",
     objectFit: "inherit",
     objectPosition: "center",

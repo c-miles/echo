@@ -21,6 +21,15 @@ export const socketEvents = (io) => {
       socket.to(roomId).emit("receiveMessage", newMessage);
     });
 
+    socket.on(
+      "toggleVideo",
+      async ({ roomId, userId, userPicture, videoEnabled }) => {
+        socket
+          .to(roomId)
+          .emit("videoToggled", { userId, userPicture, videoEnabled });
+      }
+    );
+
     socket.on("sendOffer", async ({ roomId, userId, sdp }) => {
       try {
         const room = await Room.findById(roomId);

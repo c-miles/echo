@@ -9,11 +9,21 @@ import useSocket from "../../services/useSocket";
 
 const RoomContainer: React.FC = () => {
   const { userInfo } = useAuthUser();
-  const { stream, streamReady, localVideoRef, toggleVideo, videoEnabled } =
-    useMediaStream();
   const { peerConnectionRef } = usePeerConnection();
-  const { roomId, isHost, userIdRef } = useRoomState();
   const socket = useSocket();
+
+  const {
+    isHost,
+    remoteUserPicture,
+    remoteVideoEnabled,
+    roomId,
+    setRemoteUserPicture,
+    setRemoteVideoEnabled,
+    userIdRef,
+  } = useRoomState();
+
+  const { stream, streamReady, localVideoRef, toggleVideo, videoEnabled } =
+    useMediaStream({ roomId, socket, userPicture: userInfo?.picture });
 
   const [readyForIce, setReadyForIce] = useState<boolean>(false);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -121,6 +131,17 @@ const RoomContainer: React.FC = () => {
           }
         });
       }
+
+      if (socket) {
+        socket.on("videoToggled", ({ userId, videoEnabled, userPicture }) => {
+          if (userId !== userIdRef.current) {
+            setRemoteVideoEnabled(videoEnabled);
+            if (!videoEnabled) {
+              setRemoteUserPicture(userPicture);
+            }
+          }
+        });
+      }
     }
   }, [streamReady]);
 
@@ -128,6 +149,8 @@ const RoomContainer: React.FC = () => {
     <Room
       localVideoRef={localVideoRef}
       remoteStream={remoteStream}
+      remoteUserPicture={remoteUserPicture}
+      remoteVideoEnabled={remoteVideoEnabled}
       remoteVideoRef={remoteVideoRef}
       roomId={roomId}
       toggleVideo={toggleVideo}
