@@ -4,6 +4,8 @@ import { IconButton, AppBar } from "@mui/material";
 import {
   KeyboardArrowDown,
   KeyboardArrowUp,
+  Mic,
+  MicOff,
   Videocam,
   VideocamOff,
 } from "@mui/icons-material";
@@ -11,6 +13,8 @@ import {
 import { ControlBarProps } from "../types/controlBarTypes";
 
 const ControlBar: React.FC<ControlBarProps> = ({
+  audioEnabled,
+  toggleAudio,
   toggleMessageThread,
   toggleVideo,
   videoEnabled,
@@ -31,6 +35,13 @@ const ControlBar: React.FC<ControlBarProps> = ({
           <Videocam style={styles.icon} />
         ) : (
           <VideocamOff style={styles.icon} />
+        )}
+      </IconButton>
+      <IconButton onClick={toggleAudio}>
+        {audioEnabled ? (
+          <Mic style={styles.icon} />
+        ) : (
+          <MicOff style={styles.icon} />
         )}
       </IconButton>
       <IconButton onClick={handleChevronClick} style={styles.threadContainer}>

@@ -22,8 +22,15 @@ const RoomContainer: React.FC = () => {
     userIdRef,
   } = useRoomState();
 
-  const { stream, streamReady, localVideoRef, toggleVideo, videoEnabled } =
-    useMediaStream({ roomId, socket, userPicture: userInfo?.picture });
+  const {
+    audioEnabled,
+    localVideoRef,
+    stream,
+    streamReady,
+    toggleAudio,
+    toggleVideo,
+    videoEnabled,
+  } = useMediaStream({ roomId, socket, userPicture: userInfo?.picture });
 
   const [readyForIce, setReadyForIce] = useState<boolean>(false);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
@@ -147,12 +154,14 @@ const RoomContainer: React.FC = () => {
 
   return (
     <Room
+      audioEnabled={audioEnabled}
       localVideoRef={localVideoRef}
       remoteStream={remoteStream}
       remoteUserPicture={remoteUserPicture}
       remoteVideoEnabled={remoteVideoEnabled}
       remoteVideoRef={remoteVideoRef}
       roomId={roomId}
+      toggleAudio={toggleAudio}
       toggleVideo={toggleVideo}
       username={userInfo?.username}
       userPicture={userInfo?.picture}

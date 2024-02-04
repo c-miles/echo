@@ -6,6 +6,7 @@ export default function useMediaStream({
   socket,
   userPicture,
 }: UseMediaStreamProps) {
+  const [audioEnabled, setAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [streamReady, setStreamReady] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
@@ -30,6 +31,23 @@ export default function useMediaStream({
     }
   }, [streamReady, stream]);
 
+  // TODO: Validate functionality by testing on two machines when able/deployed
+  const toggleAudio = () => {
+    if (stream) {
+      const audioTracks = stream.getAudioTracks();
+      audioTracks.forEach((track) => {
+        track.enabled = !track.enabled;
+      });
+      setAudioEnabled(audioTracks.some((track) => track.enabled));
+
+      // TODO: Implement this in socketEvents server side, reflect in peer's UI
+      // socket?.emit("audioToggled", {
+      //   roomId,
+      //   audioEnabled: audioTracks.some(track => track.enabled),
+      // });
+    }
+  };
+
   const toggleVideo = () => {
     if (stream) {
       const videoTrack = stream
@@ -48,5 +66,13 @@ export default function useMediaStream({
     }
   };
 
-  return { stream, streamReady, localVideoRef, toggleVideo, videoEnabled };
+  return {
+    audioEnabled,
+    localVideoRef,
+    stream,
+    streamReady,
+    toggleAudio,
+    toggleVideo,
+    videoEnabled,
+  };
 }

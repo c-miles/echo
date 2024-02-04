@@ -31,7 +31,7 @@ const useRoomActions = () => {
           if (data.roomId) {
             navigate(`/room/${data.roomId}`);
           } else {
-            // Handle case where no room is found
+            // TODO: Handle case where no room is found
           }
         })
         .catch((error) => {

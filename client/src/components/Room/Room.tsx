@@ -7,12 +7,14 @@ import MessageThread from "../MessageThread";
 import { RoomProps } from "../../types/roomTypes";
 
 const Room: React.FC<RoomProps> = ({
+  audioEnabled,
   localVideoRef,
   remoteStream,
   remoteUserPicture,
   remoteVideoEnabled,
   remoteVideoRef,
   roomId,
+  toggleAudio,
   toggleVideo,
   username,
   userPicture,
@@ -82,6 +84,8 @@ const Room: React.FC<RoomProps> = ({
       </Box>
 
       <ControlBar
+        audioEnabled={audioEnabled}
+        toggleAudio={toggleAudio}
         toggleMessageThread={toggleMessageThread}
         toggleVideo={toggleVideo}
         videoEnabled={videoEnabled}
