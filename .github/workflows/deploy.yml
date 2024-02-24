@@ -15,11 +15,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16.20.1'
+          node-version: "16.20.1"
 
       - name: Install server dependencies
         run: npm install
         working-directory: ./
+
+      - name: Install client dependencies
+        run: npm install
+        working-directory: ./client
 
       - name: Build client application
         run: npm run build
