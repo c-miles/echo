@@ -11,12 +11,16 @@ const AuthenticationButton: React.FC = () => {
 
   const handleLogin = () => {
     loginWithRedirect({
-      redirectUri: "http://localhost:3001/dashboard",
+      redirectUri: process.env.REACT_APP_AUTH0_REDIRECT_URI,
     } as RedirectLoginOptions);
   };
 
   return (
-    <Button variant="contained" onClick={handleLogin} sx={{ backgroundColor: "#424242"}}>
+    <Button
+      variant="contained"
+      onClick={handleLogin}
+      sx={{ backgroundColor: "#424242" }}
+    >
       Login
     </Button>
   );

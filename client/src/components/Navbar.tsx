@@ -29,6 +29,14 @@ const Navbar: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    logout({
+      logoutParams: {
+        returnTo: process.env.REACT_APP_AUTH0_LOGOUT_REDIRECT_URI,
+      },
+    });
+  };
+
   const navigateToDashboard = () => {
     navigate("/dashboard");
   };
@@ -57,7 +65,7 @@ const Navbar: React.FC = () => {
               onClose={handleClose}
             >
               <MenuItem onClick={() => navigate("/profile")}>Profile</MenuItem>
-              <MenuItem onClick={() => logout()}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </>
         )}
