@@ -17,6 +17,13 @@ jobs:
         with:
           node-version: "18"
 
+      - name: Setup environment variables
+        run: |
+          echo "REACT_APP_AUTH0_DOMAIN=${{ secrets.REACT_APP_AUTH0_DOMAIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_AUTH0_CLIENT_ID=${{ secrets.REACT_APP_AUTH0_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_AUTH0_REDIRECT_URI=${{ secrets.REACT_APP_AUTH0_REDIRECT_URI }}" >> $GITHUB_ENV
+          echo "REACT_APP_AUTH0_LOGOUT_REDIRECT_URI=${{ secrets.REACT_APP_AUTH0_LOGOUT_REDIRECT_URI }}" >> $GITHUB_ENV
+
       - name: Install server dependencies
         run: npm install
         working-directory: ./
