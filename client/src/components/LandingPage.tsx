@@ -10,8 +10,6 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const styles = useStyles();
 
-  console.log(`Domain: ${process.env.REACT_APP_AUTH0_DOMAIN}, Client ID: ${process.env.REACT_APP_AUTH0_CLIENT_ID}`);
-
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/dashboard");
