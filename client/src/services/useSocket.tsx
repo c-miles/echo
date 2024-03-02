@@ -1,7 +1,7 @@
 import React from "react";
 import { Socket, io } from "socket.io-client";
 
-const SERVER_URL = "http://localhost:3000";
+const SERVER_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:3000";
 
 const useSocket = (): Socket | null => {
   const [socket, setSocket] = React.useState<Socket | null>(null);
