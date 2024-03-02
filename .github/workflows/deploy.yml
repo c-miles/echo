@@ -19,6 +19,7 @@ jobs:
 
       - name: Setup environment variables
         run: |
+          echo "REACT_APP_API_BASE_URL=${{ secrets.REACT_APP_API_BASE_URL }}" >> $GITHUB_ENV
           echo "REACT_APP_AUTH0_DOMAIN=${{ secrets.REACT_APP_AUTH0_DOMAIN }}" >> $GITHUB_ENV
           echo "REACT_APP_AUTH0_CLIENT_ID=${{ secrets.REACT_APP_AUTH0_CLIENT_ID }}" >> $GITHUB_ENV
           echo "REACT_APP_AUTH0_REDIRECT_URI=${{ secrets.REACT_APP_AUTH0_REDIRECT_URI }}" >> $GITHUB_ENV

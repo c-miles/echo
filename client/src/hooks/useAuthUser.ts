@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { User } from "../types/userTypes";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const useAuthUser = () => {
   const { user: authUser, isLoading } = useAuth0();
   const [userInfo, setUserInfo] = useState<User | null>(null);
@@ -12,7 +14,7 @@ const useAuthUser = () => {
     if (!authUser) return;
 
     try {
-      const response = await fetch("http://localhost:3000/user/", {
+      const response = await fetch(`${API_BASE_URL}/user/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -33,9 +35,7 @@ const useAuthUser = () => {
     if (!authUser || userInfo) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/user/${authUser.sub}`
-      );
+      const response = await fetch(`${API_BASE_URL}/user/${authUser.sub}`);
       if (response.status === 404) {
         await createUser();
       } else if (response.ok) {
@@ -70,7 +70,7 @@ const useAuthUser = () => {
   const checkUsernameAvailability = useCallback(async (username: string) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/user/check-username/${username}`
+        `${API_BASE_URL}/user/check-username/${username}`
       );
       if (!response.ok) {
         throw new Error("Failed to check username availability");
@@ -98,14 +98,11 @@ const useAuthUser = () => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:3000/user/${userInfo.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username }),
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/user/${userInfo.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        });
         if (!response.ok) {
           throw new Error("Username update failed");
         }
