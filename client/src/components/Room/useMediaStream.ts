@@ -12,17 +12,27 @@ export default function useMediaStream({
   const [videoEnabled, setVideoEnabled] = useState(true);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
 
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {
+        streamRef.current = mediaStream;
         setStream(mediaStream);
         setStreamReady(true);
       })
       .catch((error) => {
         console.error("Error getting media stream:", error);
       });
+
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {

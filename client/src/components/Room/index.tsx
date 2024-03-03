@@ -40,6 +40,7 @@ const RoomContainer: React.FC = () => {
     if (socket) {
       socket.emit("joinRoom", roomId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   useEffect(() => {
@@ -150,6 +151,7 @@ const RoomContainer: React.FC = () => {
         });
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamReady]);
 
   return (
