@@ -11,12 +11,9 @@ import { Server } from "socket.io";
 import { socketEvents } from "./sockets/socketEvents.js";
 import roomRoutes from "./routes/roomRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import diagnosticRoutes from "./routes/diagnosticRoutes.js";
 
 dotenv.config();
-connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("MongoDB connection error:", err.message));
+connect(process.env.MONGODB_URI);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +25,6 @@ app.use(cors());
 
 app.use("/rooms", roomRoutes);
 app.use("/user", userRoutes);
-app.use("/diagnostic", diagnosticRoutes);
 
 app.use(express.static(path.join(__dirname, "client/build")));
 
