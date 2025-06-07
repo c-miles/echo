@@ -1,85 +1,105 @@
-import React, { CSSProperties, useEffect, useState } from "react";
-
-import { Box } from "@mui/material";
+import React, { CSSProperties, useState } from "react";
+import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
-import { RoomProps } from "../../types/roomTypes";
+import VideoGrid from "./VideoGrid";
+import { Participant } from "./useRoomState";
+
+interface RoomProps {
+  audioEnabled: boolean;
+  localStream: MediaStream | null;
+  localUserId: string;
+  localUsername: string;
+  localVideoEnabled: boolean;
+  localVideoRef: React.RefObject<HTMLVideoElement>;
+  participants: Map<string, Participant>;
+  profilePicture?: string;
+  roomId: string | undefined;
+  roomError: string | null;
+  isConnecting: boolean;
+  toggleAudio: () => void;
+  toggleVideo: () => void;
+  onLeaveRoom: () => void;
+  username?: string;
+  socket: any; // Add socket prop
+}
 
 const Room: React.FC<RoomProps> = ({
   audioEnabled,
+  localStream,
+  localUserId,
+  localUsername,
+  localVideoEnabled,
   localVideoRef,
-  remoteStream,
-  remoteUserPicture,
-  remoteVideoEnabled,
-  remoteVideoRef,
+  participants,
+  profilePicture,
   roomId,
+  roomError,
+  isConnecting,
   toggleAudio,
   toggleVideo,
+  onLeaveRoom,
   username,
-  userPicture,
-  videoEnabled,
+  socket,
 }) => {
   const styles = useStyles();
-
-  useEffect(() => {
-    if (remoteVideoRef.current && remoteStream?.active && remoteVideoEnabled) {
-      remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current
-        .play()
-        .catch((e) => console.error("Error playing remote video:", e));
-    }
-  }, [remoteVideoRef, remoteStream, remoteVideoEnabled]);
-
   const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
 
   const toggleMessageThread = () => {
     setIsMessageThreadOpen(!isMessageThreadOpen);
   };
 
+  // Show error state
+  if (roomError) {
+    return (
+      <Box style={styles.container}>
+        <Alert severity="error" style={styles.alert}>
+          <Typography variant="h6">Unable to join room</Typography>
+          <Typography>{roomError}</Typography>
+        </Alert>
+      </Box>
+    );
+  }
+
+  // Show loading state
+  if (isConnecting) {
+    return (
+      <Box style={styles.loadingContainer}>
+        <CircularProgress size={60} />
+        <Typography variant="h6" style={styles.loadingText}>
+          Connecting to room...
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <div
-      style={{
-        ...styles.container,
-        justifyContent: remoteStream?.active ? "space-evenly" : "center",
-      }}
-    >
+    <div style={styles.container}>
+      <Box style={styles.videoGridContainer}>
+        <VideoGrid
+          localStream={localStream}
+          localUserId={localUserId}
+          localUsername={localUsername}
+          localVideoEnabled={localVideoEnabled}
+          localAudioEnabled={audioEnabled}
+          participants={participants}
+          profilePicture={profilePicture}
+        />
+      </Box>
+
+      {/* Hidden video element for local stream initialization */}
       <video
+        ref={localVideoRef}
         autoPlay
         muted
         playsInline
-        ref={localVideoRef}
-        style={{ ...styles.videoStyle, display: !videoEnabled ? "none" : "" }}
+        style={{ display: "none" }}
       />
-      <Box style={{ flexGrow: 1, display: videoEnabled ? "none" : "" }}>
-        <Box style={styles.imageContainer}>
-          <img alt="Profile Pic" src={userPicture} style={styles.image} />
-        </Box>
-      </Box>
-      {remoteStream?.active && remoteVideoEnabled ? (
-        <video
-          autoPlay
-          playsInline
-          ref={remoteVideoRef}
-          style={{
-            ...styles.videoStyle,
-            display: !remoteVideoEnabled ? "none" : "",
-          }}
-        />
-      ) : (
-        <Box style={{ flexGrow: 1, display: remoteVideoEnabled ? "none" : "" }}>
-          <Box style={styles.imageContainer}>
-            <img
-              alt="Remote User Profile Pic"
-              src={remoteUserPicture}
-              style={styles.image}
-            />
-          </Box>
-        </Box>
-      )}
+
       <Box sx={styles.threadContainer}>
-        {isMessageThreadOpen && (
-          <MessageThread roomId={roomId} username={username} />
+        {isMessageThreadOpen && roomId && (
+          <MessageThread roomId={roomId} username={username || localUsername} socket={socket} />
         )}
       </Box>
 
@@ -88,7 +108,9 @@ const Room: React.FC<RoomProps> = ({
         toggleAudio={toggleAudio}
         toggleMessageThread={toggleMessageThread}
         toggleVideo={toggleVideo}
-        videoEnabled={videoEnabled}
+        videoEnabled={localVideoEnabled}
+        onLeaveRoom={onLeaveRoom}
+        participantCount={participants.size + 1}
       />
     </div>
   );
@@ -99,35 +121,39 @@ export default Room;
 const useStyles = (): { [key: string]: CSSProperties } => ({
   container: {
     display: "flex",
-    alignItems: "center",
-    justifyItems: "center",
-    boxSizing: "border-box",
+    flexDirection: "column",
     height: "calc(100vh - 64px)", // NOTE: height of Navbar
-    margin: "0 auto",
     width: "100vw",
-  },
-  hidden: {
-    display: "none",
-  },
-  imageContainer: {
-    display: "flex",
-    justifyContent: "center",
-    width: "100%",
-  },
-  image: {
-    height: "300px",
-    objectFit: "inherit",
-    objectPosition: "center",
-    width: "400px",
-  },
-  threadContainer: {
-    bottom: -4,
-    marginLeft: "auto",
+    backgroundColor: "#1a1a1a",
     position: "relative",
   },
-  videoStyle: {
-    height: "300px",
-    width: "400px",
-    flexGrow: 1,
+  loadingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "calc(100vh - 64px)",
+    backgroundColor: "#1a1a1a",
+    gap: "1.5rem",
+  },
+  loadingText: {
+    color: "#fff",
+    marginTop: "1rem",
+  },
+  videoGridContainer: {
+    flex: 1,
+    overflow: "hidden",
+    position: "relative",
+  },
+  threadContainer: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 80, // Height of control bar
+    zIndex: 10,
+  },
+  alert: {
+    maxWidth: "500px",
+    margin: "auto",
   },
 });

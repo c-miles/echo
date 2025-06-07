@@ -2,32 +2,35 @@ import React, { useState, useEffect } from "react";
 
 import { Message } from "../../types/messageTypes";
 import MessageThread from "./MessageThread";
-import useSocket from "../../services/useSocket";
 
 const MessageThreadContainer: React.FC<{
   roomId: string | undefined;
   username: string | undefined;
-}> = ({ roomId, username }) => {
+  socket: any;
+}> = ({ roomId, username, socket }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const socket = useSocket();
 
   useEffect(() => {
-    if (socket) {
-      socket.emit("joinRoom", roomId);
+    if (socket && roomId) {
+      // Request existing room messages when component mounts
+      socket.emit("getRoomMessages", { roomId });
 
-      socket.on("roomMessages", (roomMessages) => {
+      socket.on("roomMessages", (roomMessages: Message[]) => {
         setMessages(roomMessages);
       });
 
-      socket.on("receiveMessage", (receivedMessage) => {
+      socket.on("receiveMessage", (receivedMessage: Message) => {
         setMessages((prevMessages) => {
-          if (
-            prevMessages.some(
-              (msg) => msg.timestamp === receivedMessage.timestamp
-            )
-          ) {
+          // Skip duplicates: check if we already have this message by content and username
+          const isDuplicate = prevMessages.some((msg) =>
+            msg.message === receivedMessage.message &&
+            msg.username === receivedMessage.username
+          );
+
+          if (isDuplicate) {
             return prevMessages;
           }
+
           return [...prevMessages, receivedMessage];
         });
       });
@@ -40,14 +43,16 @@ const MessageThreadContainer: React.FC<{
   }, [socket, roomId]);
 
   const handleSendMessage = (messageContent: string) => {
-    if (messageContent.trim() && roomId && username) { // TODO: Eliminate all these checks
+    if (messageContent.trim() && roomId && username) {
       const newMessage = {
         roomId,
         username,
         message: messageContent,
         timestamp: new Date(),
       };
+      // Add message locally immediately for responsive UI
       setMessages((prevMessages) => [...prevMessages, newMessage]);
+      // Send to other users via socket
       socket?.emit("sendMessage", newMessage);
     }
   };

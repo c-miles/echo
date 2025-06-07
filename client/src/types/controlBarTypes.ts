@@ -4,4 +4,6 @@ export type ControlBarProps = {
   toggleMessageThread: () => void;
   toggleVideo: () => void;
   videoEnabled: boolean;
+  onLeaveRoom?: () => void;
+  participantCount?: number;
 };

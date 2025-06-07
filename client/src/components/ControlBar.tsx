@@ -1,11 +1,13 @@
 import React, { useState, CSSProperties } from "react";
 
-import { IconButton, AppBar } from "@mui/material";
+import { IconButton, AppBar, Chip } from "@mui/material";
 import {
+  ExitToApp,
   KeyboardArrowDown,
   KeyboardArrowUp,
   Mic,
   MicOff,
+  People,
   Videocam,
   VideocamOff,
 } from "@mui/icons-material";
@@ -14,6 +16,8 @@ import { ControlBarProps } from "../types/controlBarTypes";
 
 const ControlBar: React.FC<ControlBarProps> = ({
   audioEnabled,
+  onLeaveRoom,
+  participantCount,
   toggleAudio,
   toggleMessageThread,
   toggleVideo,
@@ -30,27 +34,48 @@ const ControlBar: React.FC<ControlBarProps> = ({
 
   return (
     <AppBar position="static" style={styles.container}>
-      <IconButton onClick={toggleVideo}>
-        {videoEnabled ? (
-          <Videocam style={styles.icon} />
-        ) : (
-          <VideocamOff style={styles.icon} />
+      <div style={styles.leftSection}>
+        {participantCount && (
+          <Chip
+            icon={<People style={styles.chipIcon} />}
+            label={participantCount}
+            style={styles.participantChip}
+            size="small"
+          />
         )}
-      </IconButton>
-      <IconButton onClick={toggleAudio}>
-        {audioEnabled ? (
-          <Mic style={styles.icon} />
-        ) : (
-          <MicOff style={styles.icon} />
+      </div>
+
+      <div style={styles.centerSection}>
+        <IconButton onClick={toggleVideo}>
+          {videoEnabled ? (
+            <Videocam style={styles.icon} />
+          ) : (
+            <VideocamOff style={styles.iconDisabled} />
+          )}
+        </IconButton>
+        <IconButton onClick={toggleAudio}>
+          {audioEnabled ? (
+            <Mic style={styles.icon} />
+          ) : (
+            <MicOff style={styles.iconDisabled} />
+          )}
+        </IconButton>
+        {onLeaveRoom && (
+          <IconButton onClick={onLeaveRoom} style={styles.leaveButton}>
+            <ExitToApp style={styles.leaveIcon} />
+          </IconButton>
         )}
-      </IconButton>
-      <IconButton onClick={handleChevronClick} style={styles.threadContainer}>
-        {isMessageThreadOpen ? (
-          <KeyboardArrowDown style={styles.icon} />
-        ) : (
-          <KeyboardArrowUp style={styles.icon} />
-        )}
-      </IconButton>
+      </div>
+
+      <div style={styles.rightSection}>
+        <IconButton onClick={handleChevronClick}>
+          {isMessageThreadOpen ? (
+            <KeyboardArrowDown style={styles.icon} />
+          ) : (
+            <KeyboardArrowUp style={styles.icon} />
+          )}
+        </IconButton>
+      </div>
     </AppBar>
   );
 };
@@ -59,17 +84,49 @@ export default ControlBar;
 
 const useControlBarStyles = (): { [key: string]: CSSProperties } => ({
   container: {
-    backgroundColor: "#424242",
+    backgroundColor: "#2a2a2a",
     bottom: 0,
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    alignItems: "center",
     position: "fixed",
+    padding: "0.5rem 1rem",
+    height: "80px",
   },
-  threadContainer: {
-    position: "absolute",
-    right: "2%",
+  leftSection: {
+    display: "flex",
+    alignItems: "center",
+    minWidth: "150px",
+  },
+  centerSection: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+  },
+  rightSection: {
+    display: "flex",
+    alignItems: "center",
+    minWidth: "150px",
+    justifyContent: "flex-end",
+  },
+  participantChip: {
+    backgroundColor: "#3a3a3a",
+    color: "white",
+  },
+  chipIcon: {
+    color: "white",
   },
   icon: {
+    color: "white",
+  },
+  iconDisabled: {
+    color: "#ef5350",
+  },
+  leaveButton: {
+    marginLeft: "1rem",
+    backgroundColor: "#d32f2f",
+  },
+  leaveIcon: {
     color: "white",
   },
 });

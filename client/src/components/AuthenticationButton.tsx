@@ -11,7 +11,9 @@ const AuthenticationButton: React.FC = () => {
 
   const handleLogin = () => {
     loginWithRedirect({
-      redirectUri: process.env.REACT_APP_AUTH0_REDIRECT_URI,
+      authorizationParams: {
+        redirect_uri: process.env.REACT_APP_AUTH0_REDIRECT_URI,
+      }
     } as RedirectLoginOptions);
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import Room from "./Room";
 
 import useAuthUser from "../../hooks/useAuthUser";
@@ -9,18 +9,24 @@ import useSocket from "../../services/useSocket";
 
 const RoomContainer: React.FC = () => {
   const { userInfo } = useAuthUser();
-  const { peerConnectionRef } = usePeerConnection();
   const socket = useSocket();
 
   const {
-    isHost,
-    remoteUserPicture,
-    remoteVideoEnabled,
     roomId,
-    setRemoteUserPicture,
-    setRemoteVideoEnabled,
     userIdRef,
-  } = useRoomState();
+    usernameRef,
+    participants,
+    roomError,
+    isConnecting,
+    setRoomError,
+    setIsConnecting,
+    addParticipant,
+    removeParticipant,
+    updateParticipantMediaState,
+    updateParticipantStream,
+    updateParticipantConnectionState,
+    setMultipleParticipants,
+  } = useRoomState(userInfo?.username);
 
   const {
     audioEnabled,
@@ -32,142 +38,192 @@ const RoomContainer: React.FC = () => {
     videoEnabled,
   } = useMediaStream({ roomId, socket, userPicture: userInfo?.picture });
 
-  const [readyForIce, setReadyForIce] = useState<boolean>(false);
-  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  // Callbacks for peer connection events
+  const handleStreamAdded = useCallback((userId: string, stream: MediaStream) => {
+    console.log(`Stream added for user ${userId}`);
+    updateParticipantStream(userId, stream);
+  }, [updateParticipantStream]);
 
-  useEffect(() => {
-    if (socket) {
-      socket.emit("joinRoom", roomId);
+  const handleStreamRemoved = useCallback((userId: string) => {
+    console.log(`Stream removed for user ${userId}`);
+    const participant = participants.get(userId);
+    if (participant) {
+      updateParticipantStream(userId, undefined);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
+  }, [participants, updateParticipantStream]);
 
+  const handleConnectionStateChange = useCallback((userId: string, state: RTCPeerConnectionState) => {
+    console.log(`Connection state changed for ${userId}: ${state}`);
+    updateParticipantConnectionState(userId, state);
+  }, [updateParticipantConnectionState]);
+
+  const {
+    setLocalStream,
+    connectToPeer,
+    connectToMultiplePeers,
+    disconnectFromPeer,
+    toggleVideo: togglePeerVideo,
+    toggleAudio: togglePeerAudio,
+  } = usePeerConnection({
+    socket,
+    userId: userIdRef.current,
+    roomId: roomId || "",
+    onStreamAdded: handleStreamAdded,
+    onStreamRemoved: handleStreamRemoved,
+    onConnectionStateChange: handleConnectionStateChange,
+  });
+
+  const hasJoinedRef = useRef(false);
+
+  // Reset join flag when room changes
   useEffect(() => {
-    if (streamReady && stream && socket && peerConnectionRef.current) {
-      let peerConnection = peerConnectionRef.current;
+    hasJoinedRef.current = false;
+  }, [roomId]);
 
-      stream.getTracks().forEach((track) => {
-        peerConnection.addTrack(track, stream);
+  // Join room when socket and stream are ready
+  useEffect(() => {
+    if (socket && roomId && userIdRef.current && streamReady && stream && setLocalStream && !hasJoinedRef.current) {
+      // Set local stream in peer connection manager
+      setLocalStream(stream);
+
+      socket.emit("joinRoom", {
+        roomId,
+        userId: userIdRef.current,
+        username: usernameRef.current || userInfo?.username || "Anonymous",
+        profilePicture: userInfo?.picture,
       });
 
-      const newRemoteStream = new MediaStream();
-
-      peerConnection.ontrack = (event) => {
-        event.streams[0].getTracks().forEach((track) => {
-          newRemoteStream.addTrack(track);
-        });
-        setRemoteStream(newRemoteStream);
-      };
-
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = newRemoteStream;
-      }
-
-      let bufferedIceCandidates: RTCIceCandidate[] = [];
-      peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-          if (readyForIce) {
-            socket.emit("sendCandidate", {
-              roomId,
-              userId: userIdRef.current,
-              candidate: event.candidate,
-            });
-          } else {
-            bufferedIceCandidates.push(event.candidate);
-          }
-        }
-      };
-
-      socket.on("peerReadyForIce", ({ userId }) => {
-        if (userId !== userIdRef.current && bufferedIceCandidates.length > 0) {
-          bufferedIceCandidates.forEach((candidate) => {
-            socket.emit("sendCandidate", {
-              roomId,
-              userId: userIdRef.current,
-              candidate,
-            });
-          });
-          bufferedIceCandidates = [];
-          setReadyForIce(true);
-        }
-      });
-
-      socket.on("receiveCandidate", ({ userId, candidate }) => {
-        if (userId !== userIdRef.current && candidate) {
-          peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        }
-      });
-
-      if (isHost) {
-        peerConnection.createOffer().then(async (offer) => {
-          await peerConnection.setLocalDescription(offer);
-          socket.emit("sendOffer", {
-            roomId,
-            userId: userIdRef.current,
-            sdp: offer.sdp,
-          });
-        });
-
-        socket.on("receiveAnswer", async ({ sdp }) => {
-          if (sdp) {
-            await peerConnection.setRemoteDescription(
-              new RTCSessionDescription({ type: "answer", sdp })
-            );
-            socket.emit("readyForIce", { roomId, userId: userIdRef.current });
-          }
-        });
-      } else {
-        socket.emit("requestOffer", { roomId });
-
-        socket.on("receiveOffer", async ({ sdp }) => {
-          if (sdp) {
-            await peerConnection.setRemoteDescription(
-              new RTCSessionDescription({ type: "offer", sdp })
-            );
-
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-
-            socket.emit("sendAnswer", {
-              roomId,
-              userId: userIdRef.current,
-              sdp: answer.sdp,
-            });
-
-            socket.emit("readyForIce", { roomId, userId: userIdRef.current });
-          }
-        });
-      }
-
-      if (socket) {
-        socket.on("videoToggled", ({ userId, videoEnabled, userPicture }) => {
-          if (userId !== userIdRef.current) {
-            setRemoteVideoEnabled(videoEnabled);
-            if (!videoEnabled) {
-              setRemoteUserPicture(userPicture);
-            }
-          }
-        });
-      }
+      hasJoinedRef.current = true;
+      setIsConnecting(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [streamReady]);
+  }, [socket, roomId, userIdRef, usernameRef, userInfo, streamReady, stream, setLocalStream, setIsConnecting]);
+
+  // Handle socket events
+  useEffect(() => {
+    if (!socket) return;
+
+    // Handle current participants when joining
+    socket.on("currentParticipants", async (participantsList) => {
+      setMultipleParticipants(participantsList);
+      setIsConnecting(false);
+
+      // Ensure local stream is set and connect to all existing participants
+      if (stream && setLocalStream) {
+        setLocalStream(stream);
+        await connectToMultiplePeers(participantsList);
+      }
+    });
+
+    // Handle new user joining
+    socket.on("userJoined", async (participant) => {
+      addParticipant(participant);
+
+      // Ensure local stream is set and connect to the new user
+      // Only initiate if our userId is lexicographically greater (to prevent collisions)
+      const shouldInitiate = userIdRef.current > participant.userId;
+
+      if (stream && setLocalStream) {
+        setLocalStream(stream);
+        await connectToPeer(participant.userId, shouldInitiate);
+      }
+    });
+
+    // Handle user leaving
+    socket.on("userLeft", ({ userId }) => {
+      disconnectFromPeer(userId);
+      removeParticipant(userId);
+    });
+
+    // Handle video toggle from other users
+    socket.on("participantVideoToggled", ({ userId, videoEnabled }) => {
+      updateParticipantMediaState(userId, { video: videoEnabled });
+    });
+
+    // Handle audio toggle from other users
+    socket.on("participantAudioToggled", ({ userId, audioEnabled }) => {
+      updateParticipantMediaState(userId, { audio: audioEnabled });
+    });
+
+    // Handle errors
+    socket.on("error", ({ message }) => {
+      setRoomError(message);
+      setIsConnecting(false);
+    });
+
+    return () => {
+      socket.off("currentParticipants");
+      socket.off("userJoined");
+      socket.off("userLeft");
+      socket.off("participantVideoToggled");
+      socket.off("participantAudioToggled");
+      socket.off("error");
+    };
+  }, [socket, stream, setMultipleParticipants, addParticipant, removeParticipant, updateParticipantMediaState, connectToPeer, connectToMultiplePeers, disconnectFromPeer, setRoomError, setIsConnecting, setLocalStream, userIdRef]);
+
+  // Handle local video toggle
+  const handleToggleVideo = useCallback(() => {
+    toggleVideo();
+    togglePeerVideo(!videoEnabled);
+
+    // Emit to other users
+    if (socket && roomId) {
+      socket.emit("toggleVideo", {
+        roomId,
+        userId: userIdRef.current,
+        videoEnabled: !videoEnabled,
+      });
+    }
+  }, [toggleVideo, togglePeerVideo, videoEnabled, socket, roomId, userIdRef]);
+
+  // Handle local audio toggle
+  const handleToggleAudio = useCallback(() => {
+    toggleAudio();
+    togglePeerAudio(!audioEnabled);
+
+    // Emit to other users
+    if (socket && roomId) {
+      socket.emit("toggleAudio", {
+        roomId,
+        userId: userIdRef.current,
+        audioEnabled: !audioEnabled,
+      });
+    }
+  }, [toggleAudio, togglePeerAudio, audioEnabled, socket, roomId, userIdRef]);
+
+  // Handle leaving room
+  const handleLeaveRoom = useCallback(() => {
+    if (socket && roomId) {
+      socket.emit("leaveRoom", {
+        roomId,
+        userId: userIdRef.current,
+      });
+    }
+
+    // Reset join flag for next room
+    hasJoinedRef.current = false;
+
+    // Navigate back to dashboard
+    window.location.href = "/dashboard";
+  }, [socket, roomId, userIdRef]);
 
   return (
     <Room
       audioEnabled={audioEnabled}
+      localStream={stream}
+      localUserId={userIdRef.current}
+      localUsername={usernameRef.current || userInfo?.username || "Anonymous"}
+      localVideoEnabled={videoEnabled}
       localVideoRef={localVideoRef}
-      remoteStream={remoteStream}
-      remoteUserPicture={remoteUserPicture}
-      remoteVideoEnabled={remoteVideoEnabled}
-      remoteVideoRef={remoteVideoRef}
+      participants={participants}
+      profilePicture={userInfo?.picture}
       roomId={roomId}
-      toggleAudio={toggleAudio}
-      toggleVideo={toggleVideo}
+      roomError={roomError}
+      isConnecting={isConnecting}
+      toggleAudio={handleToggleAudio}
+      toggleVideo={handleToggleVideo}
+      onLeaveRoom={handleLeaveRoom}
       username={userInfo?.username}
-      userPicture={userInfo?.picture}
-      videoEnabled={videoEnabled}
+      socket={socket}
     />
   );
 };

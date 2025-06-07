@@ -42,7 +42,7 @@ const io = new Server(httpServer, {
 
 socketEvents(io);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 httpServer.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

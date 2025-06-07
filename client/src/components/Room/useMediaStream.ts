@@ -13,9 +13,15 @@ export default function useMediaStream({
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-
+  const isInitialized = useRef(false);
 
   useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+
+    isInitialized.current = true;
+    
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {
@@ -25,15 +31,18 @@ export default function useMediaStream({
       })
       .catch((error) => {
         console.error("Error getting media stream:", error);
+        isInitialized.current = false; // Reset on error
       });
 
+    // Cleanup function that only runs on actual unmount
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
+      isInitialized.current = false;
     };
-  }, []);
+  }, []); // Empty dependency array - only run once
 
   useEffect(() => {
     if (localVideoRef.current && streamReady && stream) {
