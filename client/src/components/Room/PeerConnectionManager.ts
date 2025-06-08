@@ -270,7 +270,9 @@ export class PeerConnectionManager {
       stream.getTracks().forEach(track => {
         const sender = senders.find(s => s.track?.kind === track.kind);
         if (sender) {
-          sender.replaceTrack(track);
+          sender.replaceTrack(track).catch(error => {
+            console.error(`Error replacing ${track.kind} track:`, error);
+          });
         } else {
           peer.connection.addTrack(track, stream);
         }

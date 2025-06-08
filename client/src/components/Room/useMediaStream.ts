@@ -69,18 +69,10 @@ export default function useMediaStream({
 
   const toggleVideo = () => {
     if (stream) {
-      const videoTrack = stream
-        .getTracks()
-        .find((track) => track.kind === "video");
+      const videoTrack = stream.getVideoTracks()[0];
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
         setVideoEnabled(videoTrack.enabled);
-
-        socket?.emit("toggleVideo", {
-          roomId,
-          videoEnabled: videoTrack.enabled,
-          userPicture,
-        });
       }
     }
   };

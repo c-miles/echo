@@ -43,7 +43,7 @@ export default function usePeerConnection({
   // Initialize peer connection manager
   useEffect(() => {
     if (!socket || !userId || !roomId) return;
-    
+
     // Only create if we don't have one already
     if (peerManagerRef.current) {
       return;
@@ -71,7 +71,7 @@ export default function usePeerConnection({
   // Connect to a new peer
   const connectToPeer = useCallback(async (targetUserId: string, isInitiator: boolean = true) => {
     if (!peerManagerRef.current) return;
-    
+
     try {
       await peerManagerRef.current.createPeerConnection(targetUserId, isInitiator);
     } catch (error) {
@@ -82,7 +82,7 @@ export default function usePeerConnection({
   // Connect to multiple peers (for when joining a room with existing participants)
   const connectToMultiplePeers = useCallback(async (participants: Participant[]) => {
     if (!peerManagerRef.current) return;
-    
+
     // Connect to each participant with proper initiator logic
     for (const participant of participants) {
       const shouldInitiate = userId > participant.userId;

@@ -37,11 +37,16 @@ const VideoElement: React.FC<VideoElementProps> = ({
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
     }
-  }, [stream, isLocal, userId]);
+  }, [stream, isLocal, userId, videoEnabled]);
+
+  // Check if video is actually enabled (stream exists, has video tracks, and they're enabled)
+  const hasActiveVideo = stream && stream.getVideoTracks().length > 0 && 
+                        stream.getVideoTracks().some(track => track.enabled) && 
+                        videoEnabled;
 
   return (
     <div className="video-element" data-user-id={userId}>
-      {videoEnabled && stream ? (
+      {hasActiveVideo ? (
         <video
           ref={videoRef}
           autoPlay

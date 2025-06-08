@@ -170,6 +170,7 @@ const RoomContainer: React.FC = () => {
     };
   }, [socket, stream, setMultipleParticipants, addParticipant, removeParticipant, updateParticipantMediaState, connectToPeer, connectToMultiplePeers, disconnectFromPeer, setRoomError, setIsConnecting, setLocalStream, userIdRef]);
 
+
   // Handle local video toggle
   const handleToggleVideo = useCallback(() => {
     toggleVideo();
