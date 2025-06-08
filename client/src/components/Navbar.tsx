@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
     <AppBar position="static" style={styles.container}>
       <Toolbar>
         <Box style={styles.box}>
-          <Typography variant="h6">Echo</Typography>
+          <Typography variant="h6">yap</Typography>
           <Typography
             variant="h6"
             style={styles.lounge}

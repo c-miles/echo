@@ -18,9 +18,9 @@ const LandingPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      <h1>Echo</h1>
+      <h1>yap</h1>
       <p>
-        Connect and engage effortlessly with Echo, your go-to video conferencing
+        Connect and engage effortlessly with yap, your go-to video conferencing
         solution.
       </p>
 

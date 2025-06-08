@@ -48,7 +48,7 @@ const Profile: React.FC<ProfileProps> = ({
       />
       <Box style={styles.info}>
         <Typography variant="h5">{userInfo?.username}</Typography>
-        <Typography variant="body1">Joined Echo: {joinedDate}</Typography>
+        <Typography variant="body1">Joined yap: {joinedDate}</Typography>
         {!isEditing && (
           <Button
             variant="outlined"
