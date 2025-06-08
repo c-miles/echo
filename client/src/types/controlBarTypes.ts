@@ -1,5 +1,6 @@
 export type ControlBarProps = {
   audioEnabled: boolean;
+  isMessageThreadOpen: boolean;
   toggleAudio: () => void;
   toggleMessageThread: () => void;
   toggleVideo: () => void;

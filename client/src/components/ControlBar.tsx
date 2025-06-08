@@ -1,4 +1,4 @@
-import React, { useState, CSSProperties } from "react";
+import React, { CSSProperties } from "react";
 
 import { IconButton, AppBar, Chip } from "@mui/material";
 import {
@@ -17,6 +17,7 @@ import { ControlBarProps } from "../types/controlBarTypes";
 
 const ControlBar: React.FC<ControlBarProps> = ({
   audioEnabled,
+  isMessageThreadOpen,
   onLeaveRoom,
   onShareRoom,
   participantCount,
@@ -27,10 +28,7 @@ const ControlBar: React.FC<ControlBarProps> = ({
 }) => {
   const styles = useControlBarStyles();
 
-  const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
-
   const handleChevronClick = () => {
-    setIsMessageThreadOpen(!isMessageThreadOpen);
     toggleMessageThread();
   };
 
@@ -97,24 +95,30 @@ const useControlBarStyles = (): { [key: string]: CSSProperties } => ({
     justifyContent: "space-between",
     alignItems: "center",
     position: "fixed",
-    padding: "0.5rem 1rem",
+    padding: "0.5rem max(1rem, 2vw)",
     height: "80px",
+    width: "100%",
+    boxSizing: "border-box",
   },
   leftSection: {
     display: "flex",
     alignItems: "center",
-    minWidth: "150px",
+    minWidth: "120px",
+    flex: "0 1 auto",
   },
   centerSection: {
     display: "flex",
     alignItems: "center",
     gap: "0.5rem",
+    flex: "1 1 auto",
+    justifyContent: "center",
   },
   rightSection: {
     display: "flex",
     alignItems: "center",
-    minWidth: "150px",
+    minWidth: "120px",
     justifyContent: "flex-end",
+    flex: "0 1 auto",
   },
   participantChip: {
     backgroundColor: "#3a3a3a",

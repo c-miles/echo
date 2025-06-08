@@ -88,7 +88,7 @@ const Room: React.FC<RoomProps> = ({
 
   return (
     <div style={styles.container}>
-      <Box style={styles.videoGridContainer}>
+      <Box style={isMessageThreadOpen ? styles.videoGridContainerWithChat : styles.videoGridContainer}>
         <VideoGrid
           localStream={localStream}
           localUserId={localUserId}
@@ -117,6 +117,7 @@ const Room: React.FC<RoomProps> = ({
 
       <ControlBar
         audioEnabled={audioEnabled}
+        isMessageThreadOpen={isMessageThreadOpen}
         toggleAudio={toggleAudio}
         toggleMessageThread={toggleMessageThread}
         toggleVideo={toggleVideo}
@@ -166,6 +167,14 @@ const useStyles = (): { [key: string]: CSSProperties } => ({
     flex: 1,
     overflow: "hidden",
     position: "relative",
+    paddingBottom: "80px", // Account for fixed control bar height
+  },
+  videoGridContainerWithChat: {
+    flex: 1,
+    overflow: "hidden",
+    position: "relative",
+    paddingBottom: "80px",
+    width: "calc(100% - min(350px, 35vw))", // Responsive chat width
   },
   threadContainer: {
     position: "absolute",

@@ -116,32 +116,66 @@ const VideoGrid: React.FC<VideoGridProps> = ({
     a.userId.localeCompare(b.userId)
   );
 
+  const renderVideoElements = () => {
+    const allParticipants = [
+      {
+        stream: localStream,
+        userId: localUserId,
+        username: localUsername,
+        videoEnabled: localVideoEnabled,
+        audioEnabled: localAudioEnabled,
+        profilePicture: profilePicture,
+        isLocal: true
+      },
+      ...participantArray.map(p => ({
+        stream: p.stream || null,
+        userId: p.userId,
+        username: p.username,
+        videoEnabled: p.mediaState.video,
+        audioEnabled: p.mediaState.audio,
+        profilePicture: p.profilePicture,
+        isLocal: false
+      }))
+    ];
+
+    // Special layouts for odd numbers using flexbox
+    if (totalParticipants === 1) {
+      return (
+        <VideoElement {...allParticipants[0]} />
+      );
+    }
+
+    if (totalParticipants === 3) {
+      return allParticipants.map((participant) => (
+        <VideoElement key={participant.userId} {...participant} />
+      ));
+    }
+
+    if (totalParticipants === 5) {
+      return (
+        <>
+          <div className="video-row top-row">
+            <VideoElement {...allParticipants[0]} />
+            <VideoElement {...allParticipants[1]} />
+            <VideoElement {...allParticipants[2]} />
+          </div>
+          <div className="video-row bottom-row">
+            <VideoElement {...allParticipants[3]} />
+            <VideoElement {...allParticipants[4]} />
+          </div>
+        </>
+      );
+    }
+
+    // Default grid layout for even numbers (2, 4, 6)
+    return allParticipants.map((participant, index) => (
+      <VideoElement key={participant.userId} {...participant} />
+    ));
+  };
+
   return (
     <div className={`video-grid ${getGridLayoutClass()}`}>
-      {/* Local user video - always first */}
-      <VideoElement
-        stream={localStream}
-        userId={localUserId}
-        username={localUsername}
-        videoEnabled={localVideoEnabled}
-        audioEnabled={localAudioEnabled}
-        profilePicture={profilePicture}
-        isLocal={true}
-      />
-
-      {/* Remote participants */}
-      {participantArray.map((participant) => (
-        <VideoElement
-          key={participant.userId}
-          stream={participant.stream || null}
-          userId={participant.userId}
-          username={participant.username}
-          videoEnabled={participant.mediaState.video}
-          audioEnabled={participant.mediaState.audio}
-          profilePicture={participant.profilePicture}
-          isLocal={false}
-        />
-      ))}
+      {renderVideoElements()}
     </div>
   );
 };
