@@ -1,4 +1,5 @@
-import React, { useEffect, useCallback, useRef } from "react";
+import React, { useEffect, useCallback, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Room from "./Room";
 
 import useAuthUser from "../../hooks/useAuthUser";
@@ -7,9 +8,18 @@ import usePeerConnection from "./usePeerConnection";
 import useRoomState from "./useRoomState";
 import useSocket from "../../services/useSocket";
 
+interface LocationState {
+  isHost?: boolean;
+  friendlyName?: string;
+}
+
 const RoomContainer: React.FC = () => {
   const { userInfo } = useAuthUser();
   const socket = useSocket();
+  const location = useLocation();
+  const state = location.state as LocationState;
+  
+  const [roomName] = useState<string | undefined>(state?.friendlyName);
 
   const {
     roomId,
@@ -217,6 +227,7 @@ const RoomContainer: React.FC = () => {
       participants={participants}
       profilePicture={userInfo?.picture}
       roomId={roomId}
+      roomName={roomName}
       roomError={roomError}
       isConnecting={isConnecting}
       toggleAudio={handleToggleAudio}

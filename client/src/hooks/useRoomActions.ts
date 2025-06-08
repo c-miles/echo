@@ -14,10 +14,9 @@ const useRoomActions = () => {
       },
     })
       .then((response) => response.json())
-      .then((data: { roomId: string; pin: string }) => {
-        console.log(data.pin); // TODO: remove me when pin is accessible
+      .then((data: { roomId: string; friendlyName: string }) => {
         navigate(`/room/${data.roomId}`, {
-          state: { isHost: true, pin: data.pin },
+          state: { isHost: true, friendlyName: data.friendlyName },
         });
       })
       .catch((error) => {
@@ -26,12 +25,14 @@ const useRoomActions = () => {
   };
 
   const joinRoom = useCallback(
-    (pin: string) => {
-      fetch(`${API_BASE_URL}/rooms/find-by-pin/${pin}`)
+    (roomName: string) => {
+      fetch(`${API_BASE_URL}/rooms/find-by-name/${roomName}`)
         .then((response) => response.json())
         .then((data) => {
           if (data.roomId) {
-            navigate(`/room/${data.roomId}`);
+            navigate(`/room/${data.roomId}`, {
+              state: { isHost: false, friendlyName: data.friendlyName }
+            });
           } else {
             // TODO: Handle case where no room is found
           }

@@ -6,4 +6,5 @@ export type ControlBarProps = {
   videoEnabled: boolean;
   onLeaveRoom?: () => void;
   participantCount?: number;
+  onShareRoom?: () => void;
 };

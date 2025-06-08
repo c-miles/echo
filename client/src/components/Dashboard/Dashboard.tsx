@@ -17,12 +17,12 @@ const Dashboard: React.FC<DashboardProps> = ({
   const styles = useStyles();
 
   const showUsernameForm = !userInfo?.username;
-  const [roomPin, setRoomPin] = useState("");
+  const [roomName, setRoomName] = useState("");
   const [showJoinRoomForm, setShowJoinRoomForm] = useState(false);
 
   const onJoinRoomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleJoinRoom(roomPin);
+    handleJoinRoom(roomName);
   };
 
   return (
@@ -103,9 +103,9 @@ const Dashboard: React.FC<DashboardProps> = ({
               >
                 <TextField
                   type="text"
-                  value={roomPin}
-                  onChange={(e) => setRoomPin(e.target.value)}
-                  placeholder="Enter Room PIN"
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  placeholder="Enter Room Name"
                   required
                   margin="normal"
                   style={styles.textField}

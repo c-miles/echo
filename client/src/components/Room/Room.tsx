@@ -3,6 +3,7 @@ import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
+import ShareRoomModal from "../ShareRoomModal";
 import VideoGrid from "./VideoGrid";
 import { Participant } from "./useRoomState";
 
@@ -16,13 +17,14 @@ interface RoomProps {
   participants: Map<string, Participant>;
   profilePicture?: string;
   roomId: string | undefined;
+  roomName?: string;
   roomError: string | null;
   isConnecting: boolean;
   toggleAudio: () => void;
   toggleVideo: () => void;
   onLeaveRoom: () => void;
   username?: string;
-  socket: any; // Add socket prop
+  socket: any;
 }
 
 const Room: React.FC<RoomProps> = ({
@@ -35,6 +37,7 @@ const Room: React.FC<RoomProps> = ({
   participants,
   profilePicture,
   roomId,
+  roomName,
   roomError,
   isConnecting,
   toggleAudio,
@@ -45,9 +48,18 @@ const Room: React.FC<RoomProps> = ({
 }) => {
   const styles = useStyles();
   const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const toggleMessageThread = () => {
     setIsMessageThreadOpen(!isMessageThreadOpen);
+  };
+
+  const handleShareRoom = () => {
+    setIsShareModalOpen(true);
+  };
+
+  const handleCloseShareModal = () => {
+    setIsShareModalOpen(false);
   };
 
   // Show error state
@@ -110,8 +122,18 @@ const Room: React.FC<RoomProps> = ({
         toggleVideo={toggleVideo}
         videoEnabled={localVideoEnabled}
         onLeaveRoom={onLeaveRoom}
+        onShareRoom={handleShareRoom}
         participantCount={participants.size + 1}
       />
+
+      {roomName && roomId && (
+        <ShareRoomModal
+          open={isShareModalOpen}
+          onClose={handleCloseShareModal}
+          roomName={roomName}
+          roomId={roomId}
+        />
+      )}
     </div>
   );
 };

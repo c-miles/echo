@@ -15,7 +15,7 @@ const ParticipantSchema = new mongoose.Schema({
 
 const RoomSchema = new mongoose.Schema({
   roomId: String,
-  pin: String,
+  friendlyName: { type: String, unique: true, required: true },
   participants: {
     type: [ParticipantSchema],
     validate: [arrayLimit, 'Room cannot exceed 6 participants']

@@ -3,10 +3,7 @@ import { Socket } from "socket.io-client";
 import { PeerConnectionManager } from "./PeerConnectionManager";
 import { Participant } from "./useRoomState";
 
-interface MediaConstraints {
-  video: boolean | MediaTrackConstraints;
-  audio: boolean | MediaTrackConstraints;
-}
+// MediaConstraints interface removed as it's not being used
 
 interface UsePeerConnectionProps {
   socket: Socket | null;

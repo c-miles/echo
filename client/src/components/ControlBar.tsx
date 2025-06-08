@@ -8,6 +8,7 @@ import {
   Mic,
   MicOff,
   People,
+  Share,
   Videocam,
   VideocamOff,
 } from "@mui/icons-material";
@@ -17,6 +18,7 @@ import { ControlBarProps } from "../types/controlBarTypes";
 const ControlBar: React.FC<ControlBarProps> = ({
   audioEnabled,
   onLeaveRoom,
+  onShareRoom,
   participantCount,
   toggleAudio,
   toggleMessageThread,
@@ -60,6 +62,11 @@ const ControlBar: React.FC<ControlBarProps> = ({
             <MicOff style={styles.iconDisabled} />
           )}
         </IconButton>
+        {onShareRoom && (
+          <IconButton onClick={onShareRoom} style={styles.shareButton}>
+            <Share style={styles.icon} />
+          </IconButton>
+        )}
         {onLeaveRoom && (
           <IconButton onClick={onLeaveRoom} style={styles.leaveButton}>
             <ExitToApp style={styles.leaveIcon} />
@@ -122,8 +129,12 @@ const useControlBarStyles = (): { [key: string]: CSSProperties } => ({
   iconDisabled: {
     color: "#ef5350",
   },
+  shareButton: {
+    marginLeft: "0.5rem",
+    backgroundColor: "#1976d2",
+  },
   leaveButton: {
-    marginLeft: "1rem",
+    marginLeft: "0.5rem",
     backgroundColor: "#d32f2f",
   },
   leaveIcon: {
