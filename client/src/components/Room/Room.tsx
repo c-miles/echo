@@ -1,6 +1,5 @@
-import React, { CSSProperties, useState } from "react";
-import { Box, Typography, CircularProgress, Alert } from "@mui/material";
-
+import React, { useState } from "react";
+import { AlertCircle } from "lucide-react";
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
 import ShareRoomModal from "../ShareRoomModal";
@@ -46,7 +45,6 @@ const Room: React.FC<RoomProps> = ({
   username,
   socket,
 }) => {
-  const styles = useStyles();
   const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
@@ -65,40 +63,61 @@ const Room: React.FC<RoomProps> = ({
   // Show error state
   if (roomError) {
     return (
-      <Box style={styles.container}>
-        <Alert severity="error" style={styles.alert}>
-          <Typography variant="h6">Unable to join room</Typography>
-          <Typography>{roomError}</Typography>
-        </Alert>
-      </Box>
+      <div className="flex items-center justify-center h-[calc(100vh-64px)] bg-bg p-8">
+        <div className="max-w-md mx-auto p-6 rounded-lg border border-red-500/20 bg-red-500/10">
+          <div className="flex items-center gap-3 mb-3">
+            <AlertCircle className="text-red-500" size={24} />
+            <h2 className="text-lg font-semibold text-red-400">Unable to join room</h2>
+          </div>
+          <p className="text-red-300">{roomError}</p>
+        </div>
+      </div>
     );
   }
 
   // Show loading state
   if (isConnecting) {
     return (
-      <Box style={styles.loadingContainer}>
-        <CircularProgress size={60} />
-        <Typography variant="h6" style={styles.loadingText}>
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-bg gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <h3 className="text-lg font-medium text-text">
           Connecting to room...
-        </Typography>
-      </Box>
+        </h3>
+      </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <Box style={isMessageThreadOpen ? styles.videoGridContainerWithChat : styles.videoGridContainer}>
-        <VideoGrid
-          localStream={localStream}
-          localUserId={localUserId}
-          localUsername={localUsername}
-          localVideoEnabled={localVideoEnabled}
-          localAudioEnabled={audioEnabled}
-          participants={participants}
-          profilePicture={profilePicture}
-        />
-      </Box>
+    <div className="room-wrapper flex flex-col bg-bg">
+      {/* Room shell with CSS Grid for video and chat columns */}
+      <div className={`room-shell ${isMessageThreadOpen ? 'chat-open' : ''}`} style={{
+        height: 'calc(100vh - 9rem)' // 4rem navbar + 5rem footer
+      }}>
+        {/* Video area - auto-resizes based on available column width */}
+        <div className="video-area flex items-center justify-center w-full">
+          <VideoGrid
+            localStream={localStream}
+            localUserId={localUserId}
+            localUsername={localUsername}
+            localVideoEnabled={localVideoEnabled}
+            localAudioEnabled={audioEnabled}
+            participants={participants}
+            profilePicture={profilePicture}
+          />
+        </div>
+
+        {/* Chat drawer column - slides in with transform for flair */}
+        <aside className={`chat-drawer overflow-hidden transition-transform duration-300 rounded-tl-lg ${
+          isMessageThreadOpen ? 'translate-x-0' : 'translate-x-full'
+        }`} style={{
+          border: '1px solid rgb(71, 85, 105)', // border-slate-600
+          borderRight: 'none'
+        }}>
+          {isMessageThreadOpen && roomId && (
+            <MessageThread roomId={roomId} username={username || localUsername} socket={socket} />
+          )}
+        </aside>
+      </div>
 
       {/* Hidden video element for local stream initialization */}
       <video
@@ -109,23 +128,20 @@ const Room: React.FC<RoomProps> = ({
         style={{ display: "none" }}
       />
 
-      <Box sx={styles.threadContainer}>
-        {isMessageThreadOpen && roomId && (
-          <MessageThread roomId={roomId} username={username || localUsername} socket={socket} />
-        )}
-      </Box>
-
-      <ControlBar
-        audioEnabled={audioEnabled}
-        isMessageThreadOpen={isMessageThreadOpen}
-        toggleAudio={toggleAudio}
-        toggleMessageThread={toggleMessageThread}
-        toggleVideo={toggleVideo}
-        videoEnabled={localVideoEnabled}
-        onLeaveRoom={onLeaveRoom}
-        onShareRoom={handleShareRoom}
-        participantCount={participants.size + 1}
-      />
+      {/* Fixed Footer Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-10" style={{ height: '5rem' }}>
+        <ControlBar
+          audioEnabled={audioEnabled}
+          isMessageThreadOpen={isMessageThreadOpen}
+          toggleAudio={toggleAudio}
+          toggleMessageThread={toggleMessageThread}
+          toggleVideo={toggleVideo}
+          videoEnabled={localVideoEnabled}
+          onLeaveRoom={onLeaveRoom}
+          onShareRoom={handleShareRoom}
+          participantCount={participants.size + 1}
+        />
+      </div>
 
       {roomName && roomId && (
         <ShareRoomModal
@@ -140,51 +156,3 @@ const Room: React.FC<RoomProps> = ({
 };
 
 export default Room;
-
-const useStyles = (): { [key: string]: CSSProperties } => ({
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    height: "calc(100vh - 64px)", // NOTE: height of Navbar
-    width: "100vw",
-    backgroundColor: "#1a1a1a",
-    position: "relative",
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "calc(100vh - 64px)",
-    backgroundColor: "#1a1a1a",
-    gap: "1.5rem",
-  },
-  loadingText: {
-    color: "#fff",
-    marginTop: "1rem",
-  },
-  videoGridContainer: {
-    flex: 1,
-    overflow: "hidden",
-    position: "relative",
-    paddingBottom: "80px", // Account for fixed control bar height
-  },
-  videoGridContainerWithChat: {
-    flex: 1,
-    overflow: "hidden",
-    position: "relative",
-    paddingBottom: "80px",
-    width: "calc(100% - min(350px, 35vw))", // Responsive chat width
-  },
-  threadContainer: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 80, // Height of control bar
-    zIndex: 10,
-  },
-  alert: {
-    maxWidth: "500px",
-    margin: "auto",
-  },
-});

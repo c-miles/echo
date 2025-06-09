@@ -45,7 +45,12 @@ const VideoElement: React.FC<VideoElementProps> = ({
                         videoEnabled;
 
   return (
-    <div className="video-element" data-user-id={userId}>
+    <div 
+      className="video-element" 
+      data-user-id={userId}
+      role="img"
+      aria-label={`${username}${isLocal ? ' (you)' : ''} - ${videoEnabled ? 'Video on' : 'Video off'}, ${audioEnabled ? 'Audio on' : 'Audio off'}`}
+    >
       {hasActiveVideo ? (
         <video
           ref={videoRef}
@@ -53,25 +58,27 @@ const VideoElement: React.FC<VideoElementProps> = ({
           playsInline
           muted={isLocal}
           className="video-stream"
+          tabIndex={-1}
+          aria-hidden="true"
         />
       ) : (
-        <div className="video-placeholder">
+        <div className="video-placeholder" aria-hidden="true">
           {profilePicture ? (
-            <img src={profilePicture} alt={username} className="profile-picture" />
+            <img src={profilePicture} alt="" className="profile-picture" />
           ) : (
             <div className="avatar-placeholder">{username.charAt(0).toUpperCase()}</div>
           )}
         </div>
       )}
       
-      <div className="video-overlay">
-        <span className="username">{username}</span>
+      <div className="video-overlay" aria-hidden="true">
+        <span className="username">{username}{isLocal ? ' (You)' : ''}</span>
         <div className="media-indicators">
           {!audioEnabled && (
-            <span className="muted-indicator" title="Muted">🔇</span>
+            <span className="muted-indicator" title="Microphone muted" aria-label="Muted">🔇</span>
           )}
           {!videoEnabled && (
-            <span className="video-off-indicator" title="Video Off">📹</span>
+            <span className="video-off-indicator" title="Camera off" aria-label="Video off">📹</span>
           )}
         </div>
       </div>
@@ -138,37 +145,26 @@ const VideoGrid: React.FC<VideoGridProps> = ({
       }))
     ];
 
-    // Special layouts for odd numbers using flexbox
-    if (totalParticipants === 1) {
-      return (
-        <VideoElement {...allParticipants[0]} />
-      );
-    }
-
-    if (totalParticipants === 3) {
-      return allParticipants.map((participant) => (
-        <VideoElement key={participant.userId} {...participant} />
-      ));
-    }
-
+    // Special case for 5 participants: use flexbox rows for centered layout
     if (totalParticipants === 5) {
       return (
         <>
-          <div className="video-row top-row">
-            <VideoElement {...allParticipants[0]} />
-            <VideoElement {...allParticipants[1]} />
-            <VideoElement {...allParticipants[2]} />
+          <div className="video-row">
+            {allParticipants.slice(0, 3).map((participant) => (
+              <VideoElement key={participant.userId} {...participant} />
+            ))}
           </div>
           <div className="video-row bottom-row">
-            <VideoElement {...allParticipants[3]} />
-            <VideoElement {...allParticipants[4]} />
+            {allParticipants.slice(3, 5).map((participant) => (
+              <VideoElement key={participant.userId} {...participant} />
+            ))}
           </div>
         </>
       );
     }
 
-    // Default grid layout for even numbers (2, 4, 6)
-    return allParticipants.map((participant, index) => (
+    // All other layouts handled by CSS Grid
+    return allParticipants.map((participant) => (
       <VideoElement key={participant.userId} {...participant} />
     ));
   };

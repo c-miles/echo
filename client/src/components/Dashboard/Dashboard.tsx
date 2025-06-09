@@ -1,9 +1,10 @@
-import React, { CSSProperties, useState } from "react";
+import React, { useState, Fragment } from "react";
 import { BeatLoader } from "react-spinners";
 import { DashboardProps } from "../../types/dashboardTypes";
-
-import { Box, Button, FormControl, TextField, Typography } from "@mui/material";
-import { Close, MeetingRoom, VideoCall } from "@mui/icons-material";
+import { Dialog, Transition } from "@headlessui/react";
+import { Video, Users, X } from "lucide-react";
+import { Button, Input } from "../atoms";
+import DashboardCard from "../molecules/DashboardCard";
 
 const Dashboard: React.FC<DashboardProps> = ({
   createRoom,
@@ -14,8 +15,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   userInfo,
   usernameError,
 }) => {
-  const styles = useStyles();
-
   const showUsernameForm = !userInfo?.username;
   const [roomName, setRoomName] = useState("");
   const [showJoinRoomForm, setShowJoinRoomForm] = useState(false);
@@ -26,96 +25,113 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div style={styles.container}>
-      {(showUsernameForm || showJoinRoomForm) && <div style={styles.overlay} />}
-
+    <div className="flex items-center justify-center min-h-[calc(100vh-64px)] p-8">
       {userInfo === null ? (
-        <BeatLoader color="#09f" style={styles.spinner} />
+        <BeatLoader color="#64748b" />
       ) : showUsernameForm ? (
-        <FormControl
-          component="form"
-          onSubmit={handleUsernameSubmit}
-          style={styles.formControl}
-        >
-          <TextField
-            error={!!usernameError}
-            helperText={usernameError}
-            type="text"
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
-            placeholder="Choose a username"
-            required
-            margin="normal"
-            style={styles.textField}
-          />
-          <Button type="submit" variant="contained" color="primary">
-            Set Username
-          </Button>
-        </FormControl>
+        <div className="w-full max-w-md">
+          <form
+            onSubmit={handleUsernameSubmit}
+            className="bg-surface p-8 rounded-lg border border-slate-700 text-center"
+          >
+            <h2 className="text-2xl font-bold text-text mb-4">Welcome to yap</h2>
+            <p className="text-text-muted mb-6">Choose a username to get started</p>
+            
+            <Input
+              type="text"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              placeholder="Choose a username"
+              required
+              error={usernameError}
+            />
+            
+            <Button type="submit" variant="primary" className="w-full mt-4">
+              Set Username
+            </Button>
+          </form>
+        </div>
       ) : (
         <>
-          <Box display="flex" flexDirection="row" alignItems="center" gap={20}>
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              gap={1}
-            >
-              <Button
-                onClick={createRoom}
-                variant="contained"
-                style={styles.button}
-              >
-                <VideoCall style={styles.icon} />
-              </Button>
-              <Typography>New Room</Typography>
-            </Box>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+            <DashboardCard
+              icon={<Video size={32} className="text-text" />}
+              title="Start a room"
+              description="Create a new video room and invite others to join"
+              onClick={createRoom}
+            />
+            
+            <DashboardCard
+              icon={<Users size={32} className="text-text" />}
+              title="Join by code"
+              description="Enter a room code to join an existing conversation"
+              onClick={() => setShowJoinRoomForm(true)}
+            />
+          </div>
 
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              gap={1}
+          {/* Join Room Modal */}
+          <Transition appear show={showJoinRoomForm} as={Fragment}>
+            <Dialog
+              as="div"
+              className="relative z-50"
+              onClose={() => setShowJoinRoomForm(false)}
             >
-              <Button
-                onClick={() => setShowJoinRoomForm(true)}
-                variant="contained"
-                style={styles.button}
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-150"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-100"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
               >
-                <MeetingRoom style={styles.icon} />
-              </Button>
-              <Typography>Join</Typography>
-            </Box>
-          </Box>
+                <div className="fixed inset-0 bg-black bg-opacity-50" />
+              </Transition.Child>
 
-          {showJoinRoomForm && (
-            <div style={styles.modalStyle}>
-              <Button
-                onClick={() => setShowJoinRoomForm(false)}
-                style={styles.closeButton}
-              >
-                <Close />
-              </Button>
-              <FormControl
-                component="form"
-                onSubmit={onJoinRoomSubmit}
-                style={styles.formControl}
-              >
-                <TextField
-                  type="text"
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value)}
-                  placeholder="Enter Room Name"
-                  required
-                  margin="normal"
-                  style={styles.textField}
-                />
-                <Button type="submit" variant="contained" color="primary">
-                  Join Room
-                </Button>
-              </FormControl>
-            </div>
-          )}
+              <div className="fixed inset-0 overflow-y-auto">
+                <div className="flex min-h-full items-center justify-center p-4">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-150"
+                    enterFrom="opacity-0 scale-95"
+                    enterTo="opacity-100 scale-100"
+                    leave="ease-in duration-100"
+                    leaveFrom="opacity-100 scale-100"
+                    leaveTo="opacity-0 scale-95"
+                  >
+                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-surface border border-slate-700 p-6 text-left align-middle shadow-xl transition-all">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-text mb-4 relative"
+                      >
+                        Join Room
+                        <button
+                          onClick={() => setShowJoinRoomForm(false)}
+                          className="absolute right-0 top-0 text-text-muted hover:text-text transition-colors"
+                        >
+                          <X size={20} />
+                        </button>
+                      </Dialog.Title>
+                      
+                      <form onSubmit={onJoinRoomSubmit}>
+                        <Input
+                          type="text"
+                          value={roomName}
+                          onChange={(e) => setRoomName(e.target.value)}
+                          placeholder="Enter room name"
+                          required
+                        />
+                        
+                        <Button type="submit" variant="primary" className="w-full mt-4">
+                          Join Room
+                        </Button>
+                      </form>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </Dialog>
+          </Transition>
         </>
       )}
     </div>
@@ -123,67 +139,3 @@ const Dashboard: React.FC<DashboardProps> = ({
 };
 
 export default Dashboard;
-
-const useStyles = (): { [key: string]: CSSProperties } => ({
-  container: {
-    display: "flex",
-    alignItems: "center",
-    flexDirection: "column",
-    height: "calc(100vh - 64px)",
-    justifyContent: "center",
-    position: "relative",
-  },
-  button: {
-    width: 120,
-    height: 120,
-    backgroundColor: "#424242",
-  },
-  closeButton: {
-    backgroundColor: "transparent",
-    borderRadius: "50%",
-    color: "grey",
-    cursor: "pointer",
-    minWidth: "auto",
-    padding: "10px",
-    position: "absolute",
-    right: 0,
-    top: 0,
-  },
-  formControl: {
-    textAlign: "center",
-    zIndex: 2,
-  },
-  hidden: {
-    display: "none",
-  },
-  icon: {
-    fontSize: 70,
-  },
-  modalStyle: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    zIndex: 3,
-    padding: "50px",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-  },
-  overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    zIndex: 2,
-  },
-  spinner: {
-    position: "absolute",
-  },
-  textField: {
-    width: 300,
-  },
-});

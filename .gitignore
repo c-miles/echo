@@ -4,3 +4,6 @@ node_modules/
 
 # macOS
 .DS_Store
+
+PROJECT_CONTEXT.md
+roadmap.html

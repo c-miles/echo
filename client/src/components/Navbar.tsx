@@ -1,33 +1,24 @@
-import React, { CSSProperties, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-import {
-  AppBar,
-  Avatar,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-
 import { useAuth0 } from "@auth0/auth0-react";
+import { User, ChevronDown } from "lucide-react";
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth0();
   const navigate = useNavigate();
-  const styles = useStyles();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     logout({
@@ -42,51 +33,62 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <AppBar position="static" style={styles.container}>
-      <Toolbar>
-        <Box style={styles.box}>
-          <Typography variant="h6">yap</Typography>
-          <Typography
-            variant="h6"
-            style={styles.lounge}
+    <nav className="sticky top-0 h-16 bg-surface border-b border-slate-700 z-50">
+      <div className="h-full px-4 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <h1 className="text-xl font-medium text-text">yap</h1>
+          <button
             onClick={navigateToDashboard}
+            className="text-text-muted hover:text-text transition-colors"
           >
             Lounge
-          </Typography>
-        </Box>
+          </button>
+        </div>
+        
         {user && (
-          <>
-            <IconButton onClick={handleMenu} size="large">
-              <Avatar alt={user.name} src={user.picture} />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-primary transition-colors"
             >
-              <MenuItem onClick={() => navigate("/profile")}>Profile</MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
-          </>
+              {user.picture ? (
+                <img 
+                  src={user.picture} 
+                  alt={user.name || 'User'}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                  <User size={16} className="text-text" />
+                </div>
+              )}
+              <ChevronDown size={16} className={`text-text-muted transition-transform ${
+                isOpen ? 'rotate-180' : ''
+              }`} />
+            </button>
+            
+            {isOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-surface border border-slate-700 rounded-lg shadow-lg overflow-hidden">
+                <button
+                  onClick={() => { navigate('/profile'); setIsOpen(false); }}
+                  className="w-full px-4 py-3 text-left text-text hover:bg-primary transition-colors"
+                >
+                  Profile
+                </button>
+                <div className="border-t border-slate-700" />
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-3 text-left text-text hover:bg-red-600 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         )}
-      </Toolbar>
-    </AppBar>
+      </div>
+    </nav>
   );
 };
 
 export default Navbar;
-
-const useStyles = (): { [key: string]: CSSProperties } => ({
-  container: {
-    backgroundColor: "#424242",
-  },
-  box: {
-    display: "flex",
-    alignItems: "center",
-    flexGrow: 1,
-  },
-  lounge: {
-    cursor: "pointer",
-    marginLeft: "3%",
-  },
-});

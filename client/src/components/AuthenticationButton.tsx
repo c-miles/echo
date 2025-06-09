@@ -1,6 +1,6 @@
 import React from "react";
 import { RedirectLoginOptions, useAuth0 } from "@auth0/auth0-react";
-import Button from "@mui/material/Button";
+import { Button } from "./atoms";
 
 const AuthenticationButton: React.FC = () => {
   const { isAuthenticated, loginWithRedirect } = useAuth0();
@@ -19,11 +19,11 @@ const AuthenticationButton: React.FC = () => {
 
   return (
     <Button
-      variant="contained"
+      variant="primary"
       onClick={handleLogin}
-      sx={{ backgroundColor: "#424242" }}
+      size="lg"
     >
-      Login
+      Sign In
     </Button>
   );
 };

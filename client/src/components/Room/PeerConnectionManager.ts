@@ -12,7 +12,7 @@ export class PeerConnectionManager {
   private localStream: MediaStream | null = null;
   private socket: Socket;
   private userId: string;
-  private roomId: string;
+  private _roomId: string; // Reserved for future room-specific WebRTC features
   private callbacks: {
     onStreamAdded: (userId: string, stream: MediaStream) => void;
     onStreamRemoved: (userId: string) => void;
@@ -31,7 +31,7 @@ export class PeerConnectionManager {
   ) {
     this.socket = socket;
     this.userId = userId;
-    this.roomId = roomId;
+    this._roomId = roomId;
     this.callbacks = callbacks;
 
     this.setupSocketListeners();

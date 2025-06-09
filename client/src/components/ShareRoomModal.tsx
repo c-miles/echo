@@ -1,17 +1,7 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  IconButton,
-  Snackbar,
-  Alert,
-} from "@mui/material";
-import { ContentCopy, Close } from "@mui/icons-material";
+import React, { useState, Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { Copy, X } from "lucide-react";
+import { Button, IconButton } from "./atoms";
 
 interface ShareRoomModalProps {
   open: boolean;
@@ -24,7 +14,6 @@ const ShareRoomModal: React.FC<ShareRoomModalProps> = ({
   open,
   onClose,
   roomName,
-  roomId,
 }) => {
   const [showCopiedToast, setShowCopiedToast] = useState(false);
 
@@ -34,6 +23,7 @@ const ShareRoomModal: React.FC<ShareRoomModalProps> = ({
     try {
       await navigator.clipboard.writeText(shareableUrl);
       setShowCopiedToast(true);
+      setTimeout(() => setShowCopiedToast(false), 3000);
     } catch (err) {
       // Fallback for browsers that don't support clipboard API
       const textArea = document.createElement("textarea");
@@ -43,147 +33,113 @@ const ShareRoomModal: React.FC<ShareRoomModalProps> = ({
       document.execCommand("copy");
       document.body.removeChild(textArea);
       setShowCopiedToast(true);
+      setTimeout(() => setShowCopiedToast(false), 3000);
     }
-  };
-
-  const handleToastClose = () => {
-    setShowCopiedToast(false);
   };
 
   return (
     <>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="xs"
-        PaperProps={{
-          style: {
-            backgroundColor: "#2a2a2a",
-            color: "white",
-            borderRadius: "8px",
-          },
-        }}
-      >
-        <DialogTitle sx={{ color: "white", position: "relative" }}>
-          Share Room
-          <IconButton
-            onClick={onClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: "white",
-            }}
+      <Transition appear show={open} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={onClose}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-150"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            <Close />
-          </IconButton>
-        </DialogTitle>
+            <div className="fixed inset-0 bg-black bg-opacity-50" />
+          </Transition.Child>
 
-        <DialogContent>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ color: "#64b5f6", mb: 1 }}>
-              Room Name
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: "bold",
-                color: "white",
-                fontFamily: "monospace",
-                backgroundColor: "#1a1a1a",
-                padding: "0.75rem",
-                borderRadius: "8px",
-                textAlign: "center",
-              }}
-            >
-              {roomName}
-            </Typography>
-          </Box>
-
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ color: "#b0b0b0", mb: 1 }}>
-              Share this link to invite others:
-            </Typography>
-            <Box
-              sx={{
-                backgroundColor: "#1a1a1a",
-                border: "1px solid #3a3a3a",
-                borderRadius: "8px",
-                padding: "0.75rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "#64b5f6",
-                  fontFamily: "monospace",
-                  flex: 1,
-                  marginRight: "0.5rem",
-                  wordBreak: "break-all",
-                }}
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-150"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-100"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                {shareableUrl}
-              </Typography>
-              <IconButton
-                onClick={handleCopyLink}
-                size="small"
-                sx={{
-                  color: "#64b5f6",
-                  "&:hover": {
-                    backgroundColor: "#3a3a3a",
-                  },
-                }}
-              >
-                <ContentCopy fontSize="small" />
-              </IconButton>
-            </Box>
-          </Box>
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-surface border border-slate-700 p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-text mb-4 relative"
+                  >
+                    Share Room
+                    <button
+                      onClick={onClose}
+                      className="absolute right-0 top-0 text-text-muted hover:text-text transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </Dialog.Title>
+                  
+                  <div className="mt-4">
+                    <p className="text-sm text-primary mb-1">Room Name</p>
+                    <div className="bg-bg px-4 py-3 rounded-lg text-center font-mono text-lg text-text">
+                      {roomName}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <p className="text-sm text-text-muted mb-2">
+                      Share this link to invite others:
+                    </p>
+                    <div className="flex items-center bg-bg border border-slate-700 rounded-lg p-3">
+                      <p className="flex-1 text-sm font-mono text-primary break-all mr-2">
+                        {shareableUrl}
+                      </p>
+                      <IconButton
+                        onClick={handleCopyLink}
+                        size="sm"
+                        aria-label="Copy link"
+                      >
+                        <Copy size={16} />
+                      </IconButton>
+                    </div>
+                  </div>
+                  
+                  <p className="mt-4 text-xs text-text-muted italic">
+                    Anyone with this link can join the room if they have an account.
+                  </p>
 
-          <Typography variant="body2" sx={{ color: "#888", fontStyle: "italic" }}>
-            Anyone with this link can join the room if they have an account.
-          </Typography>
-        </DialogContent>
+                  <div className="mt-6 flex gap-2 justify-end">
+                    <Button onClick={handleCopyLink} variant="primary">
+                      <Copy size={16} className="mr-2" />
+                      Copy Link
+                    </Button>
+                    <Button onClick={onClose} variant="ghost">
+                      Close
+                    </Button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
 
-        <DialogActions>
-          <Button
-            onClick={handleCopyLink}
-            variant="contained"
-            startIcon={<ContentCopy />}
-            sx={{
-              backgroundColor: "#1976d2",
-              "&:hover": {
-                backgroundColor: "#1565c0",
-              },
-            }}
-          >
-            Copy Link
-          </Button>
-          <Button
-            onClick={onClose}
-            sx={{ color: "white" }}
-          >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={showCopiedToast}
-        autoHideDuration={3000}
-        onClose={handleToastClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      {/* Toast notification */}
+      <Transition
+        show={showCopiedToast}
+        as={Fragment}
+        enter="transform ease-out duration-150 transition"
+        enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+        enterTo="translate-y-0 opacity-100 sm:translate-x-0"
+        leave="transition ease-in duration-100"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
       >
-        <Alert
-          onClose={handleToastClose}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          Room link copied to clipboard!
-        </Alert>
-      </Snackbar>
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg">
+            Room link copied to clipboard!
+          </div>
+        </div>
+      </Transition>
     </>
   );
 };

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { BeatLoader } from "react-spinners";
-import { Typography, Box } from "@mui/material";
-
 import useAuthUser from "../hooks/useAuthUser";
 import { isValidRoomNameFormat } from "../utils/roomNameGenerator";
 import RoomContainer from "./Room";
@@ -81,38 +79,24 @@ const DirectRoomJoin: React.FC = () => {
 
   if (error) {
     return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
-        gap={2}
-      >
-        <Typography variant="h5" color="error">
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <h2 className="text-2xl font-semibold text-red-500">
           {error}
-        </Typography>
-        <Typography variant="body1" color="textSecondary">
+        </h2>
+        <p className="text-text-muted">
           The room may have ended or the link might be invalid.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     );
   }
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      height="100vh"
-      gap={2}
-    >
-      <BeatLoader color="#09f" />
-      <Typography variant="h6">
+    <div className="flex flex-col items-center justify-center h-screen gap-4">
+      <BeatLoader color="#64748b" />
+      <h3 className="text-lg font-medium text-text">
         {userInfo === null ? "Checking authentication..." : "Joining room..."}
-      </Typography>
-    </Box>
+      </h3>
+    </div>
   );
 };
 

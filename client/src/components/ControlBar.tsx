@@ -1,19 +1,16 @@
-import React, { CSSProperties } from "react";
-
-import { IconButton, AppBar, Chip } from "@mui/material";
+import React from "react";
 import {
-  ExitToApp,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
+  LogOut,
+  MessageSquare,
   Mic,
   MicOff,
-  People,
-  Share,
-  Videocam,
-  VideocamOff,
-} from "@mui/icons-material";
-
+  Users,
+  Share2,
+  Video,
+  VideoOff,
+} from "lucide-react";
 import { ControlBarProps } from "../types/controlBarTypes";
+import { IconButton } from "./atoms";
 
 const ControlBar: React.FC<ControlBarProps> = ({
   audioEnabled,
@@ -26,122 +23,77 @@ const ControlBar: React.FC<ControlBarProps> = ({
   toggleVideo,
   videoEnabled,
 }) => {
-  const styles = useControlBarStyles();
-
-  const handleChevronClick = () => {
-    toggleMessageThread();
-  };
-
   return (
-    <AppBar position="static" style={styles.container}>
-      <div style={styles.leftSection}>
+    <footer className="fixed bottom-0 left-0 right-0 h-20 bg-surface/90 backdrop-blur border-t border-slate-700 flex items-center justify-between px-4">
+      {/* Left Section - Participant Count */}
+      <div className="flex items-center min-w-[120px]">
         {participantCount && (
-          <Chip
-            icon={<People style={styles.chipIcon} />}
-            label={participantCount}
-            style={styles.participantChip}
-            size="small"
-          />
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-primary rounded-full">
+            <Users size={16} className="text-text" />
+            <span className="text-sm font-medium text-text">{participantCount}</span>
+          </div>
         )}
       </div>
 
-      <div style={styles.centerSection}>
-        <IconButton onClick={toggleVideo}>
+      {/* Center Section - Main Controls */}
+      <div className="flex items-center gap-2">
+        <IconButton
+          onClick={toggleVideo}
+          variant={videoEnabled ? "default" : "danger"}
+          aria-label={videoEnabled ? "Turn off camera" : "Turn on camera"}
+        >
           {videoEnabled ? (
-            <Videocam style={styles.icon} />
+            <Video size={20} />
           ) : (
-            <VideocamOff style={styles.iconDisabled} />
+            <VideoOff size={20} />
           )}
         </IconButton>
-        <IconButton onClick={toggleAudio}>
+        
+        <IconButton
+          onClick={toggleAudio}
+          variant={audioEnabled ? "default" : "danger"}
+          aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"}
+        >
           {audioEnabled ? (
-            <Mic style={styles.icon} />
+            <Mic size={20} />
           ) : (
-            <MicOff style={styles.iconDisabled} />
+            <MicOff size={20} />
           )}
         </IconButton>
+        
         {onShareRoom && (
-          <IconButton onClick={onShareRoom} style={styles.shareButton}>
-            <Share style={styles.icon} />
+          <IconButton
+            onClick={onShareRoom}
+            variant="primary"
+            aria-label="Share room"
+          >
+            <Share2 size={20} />
           </IconButton>
         )}
+        
         {onLeaveRoom && (
-          <IconButton onClick={onLeaveRoom} style={styles.leaveButton}>
-            <ExitToApp style={styles.leaveIcon} />
+          <IconButton
+            onClick={onLeaveRoom}
+            variant="danger"
+            aria-label="Leave room"
+          >
+            <LogOut size={20} />
           </IconButton>
         )}
       </div>
 
-      <div style={styles.rightSection}>
-        <IconButton onClick={handleChevronClick}>
-          {isMessageThreadOpen ? (
-            <KeyboardArrowDown style={styles.icon} />
-          ) : (
-            <KeyboardArrowUp style={styles.icon} />
-          )}
+      {/* Right Section - Chat Toggle */}
+      <div className="flex items-center justify-end min-w-[120px]">
+        <IconButton
+          onClick={toggleMessageThread}
+          variant="default"
+          aria-label={isMessageThreadOpen ? "Close chat" : "Open chat"}
+        >
+          <MessageSquare size={20} />
         </IconButton>
       </div>
-    </AppBar>
+    </footer>
   );
 };
 
 export default ControlBar;
-
-const useControlBarStyles = (): { [key: string]: CSSProperties } => ({
-  container: {
-    backgroundColor: "#2a2a2a",
-    bottom: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    position: "fixed",
-    padding: "0.5rem max(1rem, 2vw)",
-    height: "80px",
-    width: "100%",
-    boxSizing: "border-box",
-  },
-  leftSection: {
-    display: "flex",
-    alignItems: "center",
-    minWidth: "120px",
-    flex: "0 1 auto",
-  },
-  centerSection: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    flex: "1 1 auto",
-    justifyContent: "center",
-  },
-  rightSection: {
-    display: "flex",
-    alignItems: "center",
-    minWidth: "120px",
-    justifyContent: "flex-end",
-    flex: "0 1 auto",
-  },
-  participantChip: {
-    backgroundColor: "#3a3a3a",
-    color: "white",
-  },
-  chipIcon: {
-    color: "white",
-  },
-  icon: {
-    color: "white",
-  },
-  iconDisabled: {
-    color: "#ef5350",
-  },
-  shareButton: {
-    marginLeft: "0.5rem",
-    backgroundColor: "#1976d2",
-  },
-  leaveButton: {
-    marginLeft: "0.5rem",
-    backgroundColor: "#d32f2f",
-  },
-  leaveIcon: {
-    color: "white",
-  },
-});

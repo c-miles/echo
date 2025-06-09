@@ -1,21 +1,24 @@
-import React, { CSSProperties, useEffect, useRef } from "react";
-
-import { Box, List, ListItem, TextField } from "@mui/material";
+import React, { useEffect, useRef } from "react";
+import { Send } from "lucide-react";
 import { MessageThreadProps } from "../../types/messageTypes";
 
 const MessageThread: React.FC<MessageThreadProps> = ({
   messages,
   onSendMessage,
 }) => {
-  const styles = useStyles();
-
   const [newMessage, setNewMessage] = React.useState("");
-  const listRef = useRef<HTMLUListElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      onSendMessage(newMessage);
+      handleSendMessage();
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      onSendMessage(newMessage.trim());
       setNewMessage("");
     }
   };
@@ -27,52 +30,48 @@ const MessageThread: React.FC<MessageThreadProps> = ({
   }, [messages]);
 
   return (
-    <Box style={styles.container}>
-      <List ref={listRef} style={styles.list}>
+    <div className="h-full flex flex-col bg-surface rounded-tl-lg">
+      <div className="p-4 border-b border-slate-700">
+        <h3 className="text-lg font-semibold text-text">Chat</h3>
+      </div>
+      
+      <div
+        ref={listRef}
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+      >
         {messages.map((msg, index) => (
-          <ListItem key={index} style={styles.listItem}>
-            {`${msg.username}: ${msg.message}`}
-          </ListItem>
+          <div key={index} className="text-sm">
+            <span className="font-medium text-primary">
+              {msg.username}:
+            </span>{' '}
+            <span className="text-text">
+              {msg.message}
+            </span>
+          </div>
         ))}
-      </List>
-      <TextField
-        fullWidth
-        InputProps={{
-          style: styles.input,
-        }}
-        onChange={(e) => setNewMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Type a message"
-        sx={{
-          "& .MuiOutlinedInput-root": {
-            "&.Mui-focused fieldset": {
-              borderColor: "white",
-            },
-          },
-        }}
-        value={newMessage}
-      />
-    </Box>
+      </div>
+      
+      <div className="p-4 border-t border-slate-700">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message..."
+            className="flex-1 px-3 py-2 bg-bg text-text border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+          <button
+            onClick={handleSendMessage}
+            className="p-2 bg-primary hover:bg-primary-hov text-text rounded-lg transition-colors"
+            aria-label="Send message"
+          >
+            <Send size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
 export default MessageThread;
-
-const useStyles = (): { [key: string]: CSSProperties } => ({
-  container: {
-    backgroundColor: "#424242",
-    width: 300,
-    borderRadius: '15px 0 0 0',
-  },
-  input: {
-    color: "#FFFFFF",
-  },
-  list: {
-    height: "70vh",
-    marginBottom: "1%",
-    overflowY: "auto",
-  },
-  listItem: {
-    color: "#FFFFFF",
-  },
-});

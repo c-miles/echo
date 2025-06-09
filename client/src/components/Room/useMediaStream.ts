@@ -1,11 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { UseMediaStreamProps } from "../../types/mediaStreamTypes";
 
-export default function useMediaStream({
-  roomId,
-  socket,
-  userPicture,
-}: UseMediaStreamProps) {
+export default function useMediaStream(_props: UseMediaStreamProps) {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [streamReady, setStreamReady] = useState(false);
