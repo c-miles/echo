@@ -4,7 +4,7 @@ import Profile from "./Profile";
 import useAuthUser from "../../hooks/useAuthUser";
 
 const ProfileContainer: React.FC = () => {
-  const { userInfo, handleUsernameUpdate } = useAuthUser();
+  const { userInfo, handleUsernameSubmit } = useAuthUser();
 
   const [username, setUsername] = useState(userInfo?.username || "");
   const [error, setError] = useState("");
@@ -16,7 +16,7 @@ const ProfileContainer: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const updateError = await handleUsernameUpdate(username);
+    const updateError = await handleUsernameSubmit(username);
     setError(updateError);
     if (!updateError) {
       setIsEditing(false);

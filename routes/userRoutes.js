@@ -18,11 +18,13 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { email, picture, id } = req.body;
+    const { email, picture, id, username } = req.body;
     const newUser = new User({
       id,
       email,
       picture,
+      username,
+      usernameLower: username ? username.toLowerCase() : undefined,
     });
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);

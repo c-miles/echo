@@ -8,61 +8,72 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const useAuthUser = () => {
   const { user: authUser, isLoading } = useAuth0();
   const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [userExists, setUserExists] = useState<boolean | null>(null);
   const fetchedUserData = useRef(false);
 
-  const createUser = useCallback(async () => {
-    if (!authUser) return;
+  const createUser = useCallback(async (username: string) => {
+    if (!authUser) return "User not authenticated";
 
     try {
       const response = await fetch(`${API_BASE_URL}/user/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: authUser.email,
+          email: authUser.email || null, // null for GitHub users without public email
           picture: authUser.picture,
           id: authUser.sub,
+          username,
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        return errorData.message || "Failed to create user";
+      }
+
       const data = await response.json();
       setUserInfo(data as User);
+      setUserExists(true);
+      return "";
     } catch (error) {
       console.error("Error creating user:", error);
+      return "Failed to create user";
     }
   }, [authUser]);
 
-  const getUserData = useCallback(async () => {
-    if (!authUser || userInfo) return;
+  const checkUserExists = useCallback(async () => {
+    if (!authUser || userExists !== null) return;
 
     try {
       const response = await fetch(`${API_BASE_URL}/user/${authUser.sub}`);
       if (response.status === 404) {
-        await createUser();
+        setUserExists(false);
       } else if (response.ok) {
         const data = await response.json();
         setUserInfo(data as User);
+        setUserExists(true);
       } else {
-        throw new Error("Failed to fetch user data");
+        console.error("Failed to check user existence");
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error checking user existence:", error);
     }
-  }, [authUser, userInfo, createUser]);
+  }, [authUser, userExists]);
 
   useEffect(() => {
-    if (!fetchedUserData.current && !isLoading) {
-      getUserData();
+    if (!fetchedUserData.current && !isLoading && authUser) {
+      checkUserExists();
       fetchedUserData.current = true;
     }
-  }, [getUserData, isLoading]);
+  }, [checkUserExists, isLoading, authUser]);
 
   const validateUsername = (username: string): string => {
     const regex = /^[a-zA-Z0-9_]+$/;
     if (!regex.test(username)) {
       return "Username can only contain letters, numbers, and underscores";
     }
-    if (username.length < 3 || username.length > 30) {
-      return "Username must be between 3 and 30 characters long";
+    if (username.length < 3 || username.length > 20) {
+      return "Username must be between 3 and 20 characters long";
     }
     return "";
   };
@@ -83,10 +94,8 @@ const useAuthUser = () => {
     }
   }, []);
 
-  const handleUsernameUpdate = useCallback(
+  const handleUsernameSubmit = useCallback(
     async (username: string) => {
-      if (!userInfo) return "User not found";
-
       const validationError = validateUsername(username);
       if (validationError) {
         return validationError;
@@ -97,6 +106,14 @@ const useAuthUser = () => {
         return "Username is already taken";
       }
 
+      // For new users, create complete user record
+      if (userExists === false) {
+        return await createUser(username);
+      }
+      
+      // For existing users, update username
+      if (!userInfo) return "User not found";
+      
       try {
         const response = await fetch(`${API_BASE_URL}/user/${userInfo.id}`, {
           method: "PUT",
@@ -114,10 +131,10 @@ const useAuthUser = () => {
         return "Failed to update username";
       }
     },
-    [checkUsernameAvailability, userInfo]
+    [checkUsernameAvailability, userInfo, userExists, createUser]
   );
 
-  return { userInfo, handleUsernameUpdate };
+  return { userInfo, userExists, handleUsernameSubmit };
 };
 
 export default useAuthUser;

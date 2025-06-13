@@ -10,12 +10,14 @@ const Dashboard: React.FC<DashboardProps> = ({
   createRoom,
   handleJoinRoom,
   handleUsernameSubmit,
+  isSubmitting,
   newUsername,
   setNewUsername,
   userInfo,
+  userExists,
   usernameError,
 }) => {
-  const showUsernameForm = !userInfo?.username;
+  const showUsernameForm = userExists === false || !userInfo?.username;
   const [roomName, setRoomName] = useState("");
   const [showJoinRoomForm, setShowJoinRoomForm] = useState(false);
 
@@ -26,7 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-64px)] p-8">
-      {userInfo === null ? (
+      {userExists === null ? (
         <BeatLoader color="#64748b" />
       ) : showUsernameForm ? (
         <div className="w-full max-w-md">
@@ -46,8 +48,13 @@ const Dashboard: React.FC<DashboardProps> = ({
               error={usernameError}
             />
             
-            <Button type="submit" variant="primary" className="w-full mt-4">
-              Set Username
+            <Button 
+              type="submit" 
+              variant="primary" 
+              className="w-full mt-4"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating Account..." : "Set Username"}
             </Button>
           </form>
         </div>
