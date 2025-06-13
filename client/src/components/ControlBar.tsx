@@ -38,18 +38,6 @@ const ControlBar: React.FC<ControlBarProps> = ({
       {/* Center Section - Main Controls */}
       <div className="flex items-center gap-2">
         <IconButton
-          onClick={toggleVideo}
-          variant={videoEnabled ? "default" : "danger"}
-          aria-label={videoEnabled ? "Turn off camera" : "Turn on camera"}
-        >
-          {videoEnabled ? (
-            <Video size={20} />
-          ) : (
-            <VideoOff size={20} />
-          )}
-        </IconButton>
-        
-        <IconButton
           onClick={toggleAudio}
           variant={audioEnabled ? "default" : "danger"}
           aria-label={audioEnabled ? "Mute microphone" : "Unmute microphone"}
@@ -58,6 +46,18 @@ const ControlBar: React.FC<ControlBarProps> = ({
             <Mic size={20} />
           ) : (
             <MicOff size={20} />
+          )}
+        </IconButton>
+        
+        <IconButton
+          onClick={toggleVideo}
+          variant={videoEnabled ? "default" : "danger"}
+          aria-label={videoEnabled ? "Turn on camera" : "Turn on camera"}
+        >
+          {videoEnabled ? (
+            <Video size={20} />
+          ) : (
+            <VideoOff size={20} />
           )}
         </IconButton>
         

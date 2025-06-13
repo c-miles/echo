@@ -5,7 +5,9 @@ export default function useMediaStream(_props: UseMediaStreamProps) {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [streamReady, setStreamReady] = useState(false);
-  const [videoEnabled, setVideoEnabled] = useState(true);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [permissionError, setPermissionError] = useState<'denied' | 'notfound' | 'other' | null>(null);
+  const [videoPermissionError, setVideoPermissionError] = useState<'denied' | 'notfound' | 'other' | null>(null);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -18,17 +20,27 @@ export default function useMediaStream(_props: UseMediaStreamProps) {
 
     isInitialized.current = true;
     
+    // Request audio only initially  
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
+      .getUserMedia({ audio: true })
       .then((mediaStream) => {
         streamRef.current = mediaStream;
         setStream(mediaStream);
         setStreamReady(true);
+        setPermissionError(null);
       })
       .catch((error) => {
-        console.error("Error getting media stream:", error);
-        isInitialized.current = false; // Reset on error
+        console.error("Error getting audio stream:", error);
+        isInitialized.current = false;
+        if (error.name === 'NotAllowedError') {
+          setPermissionError('denied');
+        } else if (error.name === 'NotFoundError') {
+          setPermissionError('notfound');
+        } else {
+          setPermissionError('other');
+        }
       });
+// Error handling is now done in the catch blocks above
 
     // Cleanup function that only runs on actual unmount
     return () => {
@@ -67,19 +79,61 @@ export default function useMediaStream(_props: UseMediaStreamProps) {
     if (stream) {
       const videoTrack = stream.getVideoTracks()[0];
       if (videoTrack) {
+        // Video track exists, just toggle it
         videoTrack.enabled = !videoTrack.enabled;
         setVideoEnabled(videoTrack.enabled);
+      } else if (!videoEnabled) {
+        // No video track, request camera permission
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((videoStream) => {
+            const newVideoTrack = videoStream.getVideoTracks()[0];
+            if (newVideoTrack && streamRef.current) {
+              streamRef.current.addTrack(newVideoTrack);
+              setStream(streamRef.current);
+              setVideoEnabled(true);
+            }
+          })
+          .catch((error) => {
+            console.error("Error getting video stream:", error);
+            if (error.name === 'NotAllowedError') {
+              setVideoPermissionError('denied');
+            } else if (error.name === 'NotFoundError') {
+              setVideoPermissionError('notfound');
+            } else {
+              setVideoPermissionError('other');
+            }
+          });
       }
     }
+  };
+
+  const retryMediaAccess = async () => {
+    console.log("Retrying media access...");
+    setPermissionError(null);
+    setStreamReady(false);
+    
+    // Simple retry - just reload the page
+    window.location.reload();
+  };
+
+  const retryVideoAccess = () => {
+    setVideoPermissionError(null);
+    // User can just try clicking the video button again
   };
 
   return {
     audioEnabled,
     localVideoRef,
+    permissionError,
+    retryMediaAccess,
+    retryVideoAccess,
+    setVideoPermissionError,
     stream,
     streamReady,
     toggleAudio,
     toggleVideo,
     videoEnabled,
+    videoPermissionError,
   };
 }

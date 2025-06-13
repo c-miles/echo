@@ -41,11 +41,16 @@ const RoomContainer: React.FC = () => {
   const {
     audioEnabled,
     localVideoRef,
+    permissionError,
+    retryMediaAccess,
+    retryVideoAccess,
+    setVideoPermissionError,
     stream,
     streamReady,
     toggleAudio,
     toggleVideo,
     videoEnabled,
+    videoPermissionError,
   } = useMediaStream({ roomId, socket, userPicture: userInfo?.picture });
 
   // Callbacks for peer connection events
@@ -90,9 +95,9 @@ const RoomContainer: React.FC = () => {
     hasJoinedRef.current = false;
   }, [roomId]);
 
-  // Join room when socket and stream are ready
+  // Join room when socket and stream are ready (and no permission error)
   useEffect(() => {
-    if (socket && roomId && userIdRef.current && streamReady && stream && setLocalStream && !hasJoinedRef.current) {
+    if (socket && roomId && userIdRef.current && streamReady && stream && setLocalStream && !hasJoinedRef.current && !permissionError) {
       // Set local stream in peer connection manager
       setLocalStream(stream);
 
@@ -106,7 +111,7 @@ const RoomContainer: React.FC = () => {
       hasJoinedRef.current = true;
       setIsConnecting(true);
     }
-  }, [socket, roomId, userIdRef, usernameRef, userInfo, streamReady, stream, setLocalStream, setIsConnecting]);
+  }, [socket, roomId, userIdRef, usernameRef, userInfo, streamReady, stream, setLocalStream, setIsConnecting, permissionError]);
 
   // Handle socket events
   useEffect(() => {
@@ -226,7 +231,12 @@ const RoomContainer: React.FC = () => {
       localVideoEnabled={videoEnabled}
       localVideoRef={localVideoRef}
       participants={participants}
+      permissionError={permissionError}
       profilePicture={userInfo?.picture}
+      retryMediaAccess={retryMediaAccess}
+      retryVideoAccess={retryVideoAccess}
+      setVideoPermissionError={setVideoPermissionError}
+      videoPermissionError={videoPermissionError}
       roomId={roomId}
       roomName={roomName}
       roomError={roomError}

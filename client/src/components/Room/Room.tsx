@@ -3,6 +3,7 @@ import { AlertCircle } from "lucide-react";
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
 import ShareRoomModal from "../ShareRoomModal";
+import PermissionErrorModal from "../PermissionErrorModal";
 import VideoGrid from "./VideoGrid";
 import { Participant } from "./useRoomState";
 
@@ -14,7 +15,12 @@ interface RoomProps {
   localVideoEnabled: boolean;
   localVideoRef: React.RefObject<HTMLVideoElement>;
   participants: Map<string, Participant>;
+  permissionError: 'denied' | 'notfound' | 'other' | null;
   profilePicture?: string;
+  retryMediaAccess: () => void;
+  retryVideoAccess: () => void;
+  setVideoPermissionError: (error: 'denied' | 'notfound' | 'other' | null) => void;
+  videoPermissionError: 'denied' | 'notfound' | 'other' | null;
   roomId: string | undefined;
   roomName?: string;
   roomError: string | null;
@@ -34,7 +40,12 @@ const Room: React.FC<RoomProps> = ({
   localVideoEnabled,
   localVideoRef,
   participants,
+  permissionError,
   profilePicture,
+  retryMediaAccess,
+  retryVideoAccess,
+  setVideoPermissionError,
+  videoPermissionError,
   roomId,
   roomName,
   roomError,
@@ -59,6 +70,28 @@ const Room: React.FC<RoomProps> = ({
   const handleCloseShareModal = () => {
     setIsShareModalOpen(false);
   };
+
+  // Show permission error modal first (even if connecting)
+  if (permissionError) {
+    return (
+      <>
+        <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-bg gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <h3 className="text-lg font-medium text-text">
+            Preparing to join room...
+          </h3>
+        </div>
+        
+        <PermissionErrorModal
+          open={true}
+          onClose={onLeaveRoom}
+          onRetry={retryMediaAccess}
+          errorType={permissionError}
+          mediaType="audio"
+        />
+      </>
+    );
+  }
 
   // Show error state
   if (roomError) {
@@ -151,6 +184,15 @@ const Room: React.FC<RoomProps> = ({
           roomId={roomId}
         />
       )}
+      
+      {/* Video permission error modal */}
+      <PermissionErrorModal
+        open={!!videoPermissionError}
+        onClose={() => setVideoPermissionError(null)}
+        onRetry={retryVideoAccess}
+        errorType={videoPermissionError || 'other'}
+        mediaType="video"
+      />
     </div>
   );
 };
