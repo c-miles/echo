@@ -158,7 +158,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({
               <VideoElement key={participant.userId} {...participant} />
             ))}
           </div>
-          <div className="video-row bottom-row">
+          <div className="video-row">
             {allParticipants.slice(3, 5).map((participant) => (
               <VideoElement key={participant.userId} {...participant} />
             ))}

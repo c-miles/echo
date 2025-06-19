@@ -21,7 +21,7 @@
 
 .video-grid {
   display: grid;
-  gap: 1rem; /* 16px using Tailwind scale */
+  gap: 1.5rem; /* 24px - consistent spacing across all layouts */
   padding: 0.5rem 1rem; /* 8px 16px using Tailwind scale */
   width: 100%;
   max-width: 100%; /* Ensure full width, no shrinking */
@@ -36,11 +36,14 @@
   height: 100%;
   max-width: min(350px, 32vw); /* Baseline size constraints */
   max-height: min(262px, 24vw);
+  min-width: 200px; /* Prevent collapse */
+  min-height: 150px; /* Maintain 4:3 ratio minimum */
   aspect-ratio: 4/3; /* Original working aspect ratio */
   background-color: #1e293b; /* Keep new Slate theme color */
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0; /* Prevent flexbox shrinking */
 }
 
 /* Size Tier 1: Large & Consistent (1-3 people) - Baseline rules */
@@ -52,11 +55,6 @@
 }
 
 /* Size Tier 2: Medium (4+ people) - uses default sizing above */
-
-.video-element:hover {
-  transform: scale(1.02);
-}
-
 
 .video-element:hover {
   transform: scale(1.02);
@@ -149,8 +147,10 @@
 }
 
 .grid-layout-4 {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, max-content);
   grid-template-rows: repeat(2, minmax(0, 1fr));
+  justify-content: center;
+  gap: 1.5rem; /* Consistent spacing with other layouts */
 }
 
 .grid-layout-5 {
@@ -158,22 +158,20 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1rem; /* 16px using Tailwind scale */
+  gap: 1.5rem; /* 24px - consistent with other layouts */
 }
 
 .grid-layout-5 .video-row {
   display: flex;
-  gap: 1rem; /* 16px using Tailwind scale */
+  gap: 1.5rem; /* 24px - consistent spacing */
   justify-content: center;
-}
-
-.grid-layout-5 .video-row.bottom-row {
-  gap: 2rem; /* 32px using Tailwind scale */
+  min-height: min(262px, 24vw); /* Prevent row height changes */
 }
 
 .grid-layout-6 {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, max-content);
   grid-template-rows: repeat(2, minmax(0, 1fr));
+  justify-content: center;
 }
 
 /* Responsive adjustments - Baseline rules */
