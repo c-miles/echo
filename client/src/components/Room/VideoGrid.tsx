@@ -1,4 +1,5 @@
 import React from "react";
+import { VolumeX } from "lucide-react";
 import { Participant } from "./useRoomState";
 import "./VideoGrid.css";
 
@@ -75,10 +76,13 @@ const VideoElement: React.FC<VideoElementProps> = ({
         <span className="username">{username}{isLocal ? ' (You)' : ''}</span>
         <div className="media-indicators">
           {!audioEnabled && (
-            <span className="muted-indicator" title="Microphone muted" aria-label="Muted">🔇</span>
-          )}
-          {!videoEnabled && (
-            <span className="video-off-indicator" title="Camera off" aria-label="Video off">📹</span>
+            <span 
+              className="muted-indicator" 
+              title="Microphone muted" 
+              aria-label="Muted"
+            >
+              <VolumeX size={18} className="text-red-400" />
+            </span>
           )}
         </div>
       </div>

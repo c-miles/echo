@@ -109,6 +109,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem; /* Brings username and icon closer together */
 }
 
 .username {
@@ -121,13 +122,13 @@
 .media-indicators {
   display: flex;
   gap: 0.5rem;
+  height: 1.125rem; /* Fixed height to accommodate 18px icon */
+  align-items: center;
 }
 
-.muted-indicator,
-.video-off-indicator {
-  font-size: 1rem;
-  filter: grayscale(100%);
-  opacity: 0.8;
+.muted-indicator {
+  opacity: 0.9;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
 }
 
 /* Grid Layouts - Exact baseline rules */
