@@ -4,4 +4,5 @@ export interface UseMediaStreamProps {
   roomId: string | undefined;
   socket: Socket | null;
   userPicture: string | undefined;
+  onStreamUpdated?: (stream: MediaStream) => Promise<void>;
 }

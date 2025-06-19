@@ -260,24 +260,51 @@ export class PeerConnectionManager {
     this.peers.clear();
   }
 
-  updateLocalStream(stream: MediaStream): void {
+  async updateLocalStream(stream: MediaStream): Promise<void> {
     this.localStream = stream;
 
     // Update all peer connections with new stream
-    this.peers.forEach((peer) => {
-      const senders = peer.connection.getSenders();
+    const updatePromises = Array.from(this.peers.values()).map(peer => 
+      this.updatePeerWithNewStream(peer, stream)
+    );
 
-      stream.getTracks().forEach(track => {
-        const sender = senders.find(s => s.track?.kind === track.kind);
-        if (sender) {
-          sender.replaceTrack(track).catch(error => {
-            console.error(`Error replacing ${track.kind} track:`, error);
-          });
-        } else {
-          peer.connection.addTrack(track, stream);
-        }
-      });
+    await Promise.allSettled(updatePromises);
+  }
+
+  private async updatePeerWithNewStream(peer: PeerConnection, stream: MediaStream): Promise<void> {
+    const senders = peer.connection.getSenders();
+    let needsRenegotiation = false;
+
+    // Update tracks for this peer
+    stream.getTracks().forEach(track => {
+      const sender = senders.find(s => s.track?.kind === track.kind);
+      if (sender) {
+        sender.replaceTrack(track).catch(error => {
+          console.error(`Error replacing ${track.kind} track for ${peer.userId}:`, error);
+        });
+      } else {
+        peer.connection.addTrack(track, stream);
+        needsRenegotiation = true;
+      }
     });
+
+    // Trigger renegotiation if new tracks were added
+    if (needsRenegotiation) {
+      await this.renegotiateConnection(peer.userId);
+    }
+  }
+
+  private async renegotiateConnection(targetUserId: string): Promise<void> {
+    const peer = this.peers.get(targetUserId);
+    if (!peer || peer.connection.signalingState !== 'stable') {
+      return;
+    }
+
+    try {
+      await this.createAndSendOffer(targetUserId);
+    } catch (error) {
+      console.error(`Error renegotiating connection with ${targetUserId}:`, error);
+    }
   }
 
   toggleVideo(enabled: boolean): void {

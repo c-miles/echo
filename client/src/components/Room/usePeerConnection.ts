@@ -106,8 +106,8 @@ export default function usePeerConnection({
   }, []);
 
   // Update local stream (for changing cameras/microphones)
-  const updateLocalStream = useCallback((stream: MediaStream) => {
-    peerManagerRef.current?.updateLocalStream(stream);
+  const updateLocalStream = useCallback(async (stream: MediaStream) => {
+    await peerManagerRef.current?.updateLocalStream(stream);
   }, []);
 
   return {

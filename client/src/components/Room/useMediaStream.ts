@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { UseMediaStreamProps } from "../../types/mediaStreamTypes";
 
-export default function useMediaStream(_props: UseMediaStreamProps) {
+export default function useMediaStream({ onStreamUpdated }: UseMediaStreamProps) {
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [streamReady, setStreamReady] = useState(false);
@@ -92,6 +92,10 @@ export default function useMediaStream(_props: UseMediaStreamProps) {
               streamRef.current.addTrack(newVideoTrack);
               setStream(streamRef.current);
               setVideoEnabled(true);
+              // Notify peer connections about the updated stream
+              onStreamUpdated?.(streamRef.current).catch(error => {
+                console.error('Error updating peer connections with new video track:', error);
+              });
             }
           })
           .catch((error) => {

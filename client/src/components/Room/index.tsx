@@ -38,21 +38,6 @@ const RoomContainer: React.FC = () => {
     setMultipleParticipants,
   } = useRoomState(userInfo?.username);
 
-  const {
-    audioEnabled,
-    localVideoRef,
-    permissionError,
-    retryMediaAccess,
-    retryVideoAccess,
-    setVideoPermissionError,
-    stream,
-    streamReady,
-    toggleAudio,
-    toggleVideo,
-    videoEnabled,
-    videoPermissionError,
-  } = useMediaStream({ roomId, socket, userPicture: userInfo?.picture });
-
   // Callbacks for peer connection events
   const handleStreamAdded = useCallback((userId: string, stream: MediaStream) => {
     console.log(`Stream added for user ${userId}`);
@@ -79,6 +64,7 @@ const RoomContainer: React.FC = () => {
     disconnectFromPeer,
     toggleVideo: togglePeerVideo,
     toggleAudio: togglePeerAudio,
+    updateLocalStream,
   } = usePeerConnection({
     socket,
     userId: userIdRef.current,
@@ -86,6 +72,26 @@ const RoomContainer: React.FC = () => {
     onStreamAdded: handleStreamAdded,
     onStreamRemoved: handleStreamRemoved,
     onConnectionStateChange: handleConnectionStateChange,
+  });
+
+  const {
+    audioEnabled,
+    localVideoRef,
+    permissionError,
+    retryMediaAccess,
+    retryVideoAccess,
+    setVideoPermissionError,
+    stream,
+    streamReady,
+    toggleAudio,
+    toggleVideo,
+    videoEnabled,
+    videoPermissionError,
+  } = useMediaStream({ 
+    roomId, 
+    socket, 
+    userPicture: userInfo?.picture,
+    onStreamUpdated: updateLocalStream 
   });
 
   const hasJoinedRef = useRef(false);

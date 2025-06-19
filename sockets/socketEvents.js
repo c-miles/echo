@@ -57,7 +57,7 @@ export const socketEvents = (io) => {
           username,
           profilePicture,
           isActive: true,
-          mediaState: { video: true, audio: true }
+          mediaState: { video: false, audio: true }  // Match client's initial state
         };
 
         // Check if user already exists (reconnecting)
@@ -94,7 +94,7 @@ export const socketEvents = (io) => {
           userId,
           username,
           profilePicture,
-          mediaState: { video: true, audio: true }
+          mediaState: { video: false, audio: true }  // Match client's initial state
         });
 
         // Send existing messages
