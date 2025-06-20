@@ -55,6 +55,10 @@
     visibility: visible;
   }
 
+  .video-area {
+    transition: margin-right 0.3s ease;
+  }
+  
   .room-container.chat-open .video-area {
     margin-right: 20rem;
   }
