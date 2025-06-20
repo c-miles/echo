@@ -40,12 +40,10 @@ const RoomContainer: React.FC = () => {
 
   // Callbacks for peer connection events
   const handleStreamAdded = useCallback((userId: string, stream: MediaStream) => {
-    console.log(`Stream added for user ${userId}`);
     updateParticipantStream(userId, stream);
   }, [updateParticipantStream]);
 
   const handleStreamRemoved = useCallback((userId: string) => {
-    console.log(`Stream removed for user ${userId}`);
     const participant = participants.get(userId);
     if (participant) {
       updateParticipantStream(userId, undefined);
@@ -53,7 +51,6 @@ const RoomContainer: React.FC = () => {
   }, [participants, updateParticipantStream]);
 
   const handleConnectionStateChange = useCallback((userId: string, state: RTCPeerConnectionState) => {
-    console.log(`Connection state changed for ${userId}: ${state}`);
     updateParticipantConnectionState(userId, state);
   }, [updateParticipantConnectionState]);
 

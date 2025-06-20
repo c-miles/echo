@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 import ControlBar from "../ControlBar";
 import MessageThread from "../MessageThread";
@@ -6,6 +6,7 @@ import ShareRoomModal from "../ShareRoomModal";
 import PermissionErrorModal from "../PermissionErrorModal";
 import VideoGrid from "./VideoGrid";
 import { Participant } from "./useRoomState";
+import "./Room.css";
 
 interface RoomProps {
   audioEnabled: boolean;
@@ -58,6 +59,17 @@ const Room: React.FC<RoomProps> = ({
 }) => {
   const [isMessageThreadOpen, setIsMessageThreadOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleMessageThread = () => {
     setIsMessageThreadOpen(!isMessageThreadOpen);
@@ -71,15 +83,19 @@ const Room: React.FC<RoomProps> = ({
     setIsShareModalOpen(false);
   };
 
-  // Show permission error modal first (even if connecting)
+  // Show permission error modal
   if (permissionError) {
     return (
-      <>
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-bg gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <h3 className="text-lg font-medium text-text">
-            Preparing to join room...
-          </h3>
+      <div className="app-layout">
+        <div className="room-container">
+          <div className="video-area">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <h3 className="text-lg font-medium text-text">
+                Preparing to join room...
+              </h3>
+            </div>
+          </div>
         </div>
         
         <PermissionErrorModal
@@ -89,20 +105,24 @@ const Room: React.FC<RoomProps> = ({
           errorType={permissionError}
           mediaType="audio"
         />
-      </>
+      </div>
     );
   }
 
   // Show error state
   if (roomError) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-64px)] bg-bg p-8">
-        <div className="max-w-md mx-auto p-6 rounded-lg border border-red-500/20 bg-red-500/10">
-          <div className="flex items-center gap-3 mb-3">
-            <AlertCircle className="text-red-500" size={24} />
-            <h2 className="text-lg font-semibold text-red-400">Unable to join room</h2>
+      <div className="app-layout">
+        <div className="room-container">
+          <div className="video-area">
+            <div className="max-w-md mx-auto p-6 rounded-lg border border-red-500/20 bg-red-500/10">
+              <div className="flex items-center gap-3 mb-3">
+                <AlertCircle className="text-red-500" size={24} />
+                <h2 className="text-lg font-semibold text-red-400">Unable to join room</h2>
+              </div>
+              <p className="text-red-300">{roomError}</p>
+            </div>
           </div>
-          <p className="text-red-300">{roomError}</p>
         </div>
       </div>
     );
@@ -111,23 +131,26 @@ const Room: React.FC<RoomProps> = ({
   // Show loading state
   if (isConnecting) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-bg gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <h3 className="text-lg font-medium text-text">
-          Connecting to room...
-        </h3>
+      <div className="app-layout">
+        <div className="room-container">
+          <div className="video-area">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <h3 className="text-lg font-medium text-text">
+                Connecting to room...
+              </h3>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // Main room layout
   return (
-    <div className="room-wrapper flex flex-col bg-bg">
-      {/* Room shell with CSS Grid for video and chat columns */}
-      <div className={`room-shell ${isMessageThreadOpen ? 'chat-open' : ''}`} style={{
-        height: 'calc(100vh - 9rem)' // 4rem navbar + 5rem footer
-      }}>
-        {/* Video area - auto-resizes based on available column width */}
-        <div className="video-area flex items-center justify-center w-full">
+    <div className="app-layout">
+      <div className={`room-container ${isMessageThreadOpen ? 'chat-open' : ''}`}>
+        <div className="video-area">
           <VideoGrid
             localStream={localStream}
             localUserId={localUserId}
@@ -136,33 +159,30 @@ const Room: React.FC<RoomProps> = ({
             localAudioEnabled={audioEnabled}
             participants={participants}
             profilePicture={profilePicture}
+            isMobile={isMobile}
           />
         </div>
 
-        {/* Chat drawer column - slides in with transform for flair */}
-        <aside className={`chat-drawer overflow-hidden transition-transform duration-300 rounded-tl-lg ${
-          isMessageThreadOpen ? 'translate-x-0' : 'translate-x-full'
-        }`} style={{
-          border: '1px solid rgb(71, 85, 105)', // border-slate-600
-          borderRight: 'none'
-        }}>
-          {isMessageThreadOpen && roomId && (
-            <MessageThread roomId={roomId} username={username || localUsername} socket={socket} />
+        {isMobile && (
+          <div 
+            className={`chat-backdrop ${isMessageThreadOpen ? 'open' : ''}`} 
+            onClick={toggleMessageThread}
+            style={{ pointerEvents: isMessageThreadOpen ? 'auto' : 'none' }}
+          />
+        )}
+        
+        <div className={`chat-drawer ${isMessageThreadOpen ? 'open' : ''}`}>
+          {roomId && (
+            <MessageThread 
+              roomId={roomId} 
+              username={username || localUsername} 
+              socket={socket} 
+            />
           )}
-        </aside>
+        </div>
       </div>
 
-      {/* Hidden video element for local stream initialization */}
-      <video
-        ref={localVideoRef}
-        autoPlay
-        muted
-        playsInline
-        style={{ display: "none" }}
-      />
-
-      {/* Fixed Footer Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-10" style={{ height: '5rem' }}>
+      <div className="app-footer">
         <ControlBar
           audioEnabled={audioEnabled}
           isMessageThreadOpen={isMessageThreadOpen}
@@ -173,8 +193,11 @@ const Room: React.FC<RoomProps> = ({
           onLeaveRoom={onLeaveRoom}
           onShareRoom={handleShareRoom}
           participantCount={participants.size + 1}
+          isMobile={isMobile}
         />
       </div>
+
+      <video ref={localVideoRef} autoPlay muted playsInline style={{ display: "none" }} />
 
       {roomName && roomId && (
         <ShareRoomModal
@@ -185,7 +208,6 @@ const Room: React.FC<RoomProps> = ({
         />
       )}
       
-      {/* Video permission error modal */}
       <PermissionErrorModal
         open={!!videoPermissionError}
         onClose={() => setVideoPermissionError(null)}

@@ -8,4 +8,5 @@ export type ControlBarProps = {
   onLeaveRoom?: () => void;
   participantCount?: number;
   onShareRoom?: () => void;
+  isMobile: boolean;
 };

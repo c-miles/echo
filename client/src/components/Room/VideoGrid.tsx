@@ -11,6 +11,7 @@ interface VideoGridProps {
   localAudioEnabled: boolean;
   participants: Map<string, Participant>;
   profilePicture?: string;
+  isMobile: boolean;
 }
 
 interface VideoElementProps {
@@ -40,14 +41,15 @@ const VideoElement: React.FC<VideoElementProps> = ({
     }
   }, [stream, isLocal, userId, videoEnabled]);
 
-  // Check if video is actually enabled (stream exists, has video tracks, and they're enabled)
-  const hasActiveVideo = stream && stream.getVideoTracks().length > 0 && 
-                        stream.getVideoTracks().some(track => track.enabled) && 
-                        videoEnabled;
+  // Check if video is actually enabled
+  const hasActiveVideo = stream &&
+    stream.getVideoTracks().length > 0 &&
+    stream.getVideoTracks().some(track => track.enabled) &&
+    videoEnabled;
 
   return (
-    <div 
-      className="video-element" 
+    <div
+      className="video-element"
       data-user-id={userId}
       role="img"
       aria-label={`${username}${isLocal ? ' (you)' : ''} - ${videoEnabled ? 'Video on' : 'Video off'}, ${audioEnabled ? 'Audio on' : 'Audio off'}`}
@@ -67,18 +69,22 @@ const VideoElement: React.FC<VideoElementProps> = ({
           {profilePicture ? (
             <img src={profilePicture} alt="" className="profile-picture" />
           ) : (
-            <div className="avatar-placeholder">{username.charAt(0).toUpperCase()}</div>
+            <div className="avatar-placeholder">
+              {username.charAt(0).toUpperCase()}
+            </div>
           )}
         </div>
       )}
-      
+
       <div className="video-overlay" aria-hidden="true">
-        <span className="username">{username}{isLocal ? ' (You)' : ''}</span>
+        <span className="username">
+          {username}{isLocal ? ' (You)' : ''}
+        </span>
         <div className="media-indicators">
           {!audioEnabled && (
-            <span 
-              className="muted-indicator" 
-              title="Microphone muted" 
+            <span
+              className="muted-indicator"
+              title="Microphone muted"
               aria-label="Muted"
             >
               <VolumeX size={18} className="text-red-400" />
@@ -97,85 +103,50 @@ const VideoGrid: React.FC<VideoGridProps> = ({
   localVideoEnabled,
   localAudioEnabled,
   participants,
-  profilePicture
+  profilePicture,
+  isMobile
 }) => {
-  // Calculate total participants including local user
+  // Calculate total participants
   const totalParticipants = participants.size + 1;
 
-  // Determine grid layout class based on participant count
-  const getGridLayoutClass = () => {
-    switch (totalParticipants) {
-      case 1:
-        return "grid-layout-1";
-      case 2:
-        return "grid-layout-2";
-      case 3:
-        return "grid-layout-3";
-      case 4:
-        return "grid-layout-4";
-      case 5:
-        return "grid-layout-5";
-      case 6:
-        return "grid-layout-6";
-      default:
-        return "grid-layout-6"; // Max 6 supported
-    }
-  };
-
-  // Convert participants map to array and sort by join order (userId)
-  const participantArray = Array.from(participants.values()).sort((a, b) => 
+  // Convert participants to array and sort
+  const participantArray = Array.from(participants.values()).sort((a, b) =>
     a.userId.localeCompare(b.userId)
   );
 
-  const renderVideoElements = () => {
-    const allParticipants = [
-      {
-        stream: localStream,
-        userId: localUserId,
-        username: localUsername,
-        videoEnabled: localVideoEnabled,
-        audioEnabled: localAudioEnabled,
-        profilePicture: profilePicture,
-        isLocal: true
-      },
-      ...participantArray.map(p => ({
-        stream: p.stream || null,
-        userId: p.userId,
-        username: p.username,
-        videoEnabled: p.mediaState.video,
-        audioEnabled: p.mediaState.audio,
-        profilePicture: p.profilePicture,
-        isLocal: false
-      }))
-    ];
-
-    // Special case for 5 participants: use flexbox rows for centered layout
-    if (totalParticipants === 5) {
-      return (
-        <>
-          <div className="video-row">
-            {allParticipants.slice(0, 3).map((participant) => (
-              <VideoElement key={participant.userId} {...participant} />
-            ))}
-          </div>
-          <div className="video-row">
-            {allParticipants.slice(3, 5).map((participant) => (
-              <VideoElement key={participant.userId} {...participant} />
-            ))}
-          </div>
-        </>
-      );
-    }
-
-    // All other layouts handled by CSS Grid
-    return allParticipants.map((participant) => (
-      <VideoElement key={participant.userId} {...participant} />
-    ));
-  };
+  // Create unified participant list
+  const allParticipants = [
+    {
+      stream: localStream,
+      userId: localUserId,
+      username: localUsername,
+      videoEnabled: localVideoEnabled,
+      audioEnabled: localAudioEnabled,
+      profilePicture: profilePicture,
+      isLocal: true
+    },
+    ...participantArray.map(p => ({
+      stream: p.stream || null,
+      userId: p.userId,
+      username: p.username,
+      videoEnabled: p.mediaState.video,
+      audioEnabled: p.mediaState.audio,
+      profilePicture: p.profilePicture,
+      isLocal: false
+    }))
+  ];
 
   return (
-    <div className={`video-grid ${getGridLayoutClass()}`}>
-      {renderVideoElements()}
+    <div className="video-grid-container">
+      <div
+        className="video-grid"
+        data-count={totalParticipants}
+        data-mobile={isMobile}
+      >
+        {allParticipants.map((participant) => (
+          <VideoElement key={participant.userId} {...participant} />
+        ))}
+      </div>
     </div>
   );
 };

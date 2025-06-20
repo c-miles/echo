@@ -5,7 +5,15 @@
       "Bash(npx tsc:*)",
       "Bash(rg:*)",
       "Bash(node server.js)",
-      "Bash(mongosh:*)"
+      "Bash(mongosh:*)",
+      "Bash(cp:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(npm start)",
+      "Bash(diff:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
