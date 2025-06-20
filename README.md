@@ -67,7 +67,7 @@ A modern 6-person video chat application built with WebRTC mesh networking. Conn
    # MongoDB Connection
    MONGODB_URI=mongodb://127.0.0.1:27017/yap
    
-   # Auth0 Configuration (optional for development)
+   # Auth0 Configuration (required for authentication)
    AUTH0_DOMAIN=your-auth0-domain
    AUTH0_CLIENT_ID=your-auth0-client-id
    
@@ -178,7 +178,9 @@ yap/
 
 ## 🔧 Configuration
 
-### Auth0 Setup (Optional)
+### Auth0 Setup (Required for Authentication)
+
+Authentication is handled through Auth0. You can use Auth0 or configure another authentication provider:
 
 1. Create Auth0 account at [auth0.com](https://auth0.com)
 2. Create a new application (Single Page Application)
@@ -194,15 +196,20 @@ The application expects MongoDB to be running on the default port (27017). You c
 
 ## 🚢 Deployment
 
-The application is configured for deployment on Render.com with the following build settings:
+This application can be deployed to any hosting platform that supports Node.js applications (Heroku, Railway, DigitalOcean, AWS, Render, etc.).
 
-**Backend:**
-- Build Command: `npm install`
-- Start Command: `npm start`
+**General deployment requirements:**
+- Node.js runtime environment
+- MongoDB database (local or cloud)
+- Environment variables configured
+- Static file serving for the React frontend
 
-**Frontend:**
-- Build Command: `cd client && npm install && npm run build`
-- The build uses `CI=false` flag to treat warnings as warnings, not errors
+**Build commands:**
+- Backend: `npm install` → `npm start`
+- Frontend: `cd client && npm install && npm run build`
+- Frontend build output: `client/build/`
+
+The frontend build uses `CI=false` flag to treat warnings as warnings rather than errors.
 
 ## 🤝 Contributing
 
@@ -218,7 +225,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🔗 Related Documentation
 
-- [WebRTC Documentation](https://webrtc.org/getting-started/)
+- [WebRTC Documentation](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
 - [Socket.IO Documentation](https://socket.io/docs/v4/)
 - [MongoDB Documentation](https://docs.mongodb.com/)
 - [React Documentation](https://react.dev/)
