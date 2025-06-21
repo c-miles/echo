@@ -29,6 +29,13 @@
   pointer-events: none;
 }
 
+/* Hide cursor dot on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .wave-background:before {
+    display: none;
+  }
+}
+
 .wave-svg {
   display: block;
   width: 100%;

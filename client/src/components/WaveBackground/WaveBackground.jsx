@@ -22,6 +22,11 @@ const WaveBackground = () => {
   const pathsRef = useRef([]);
   const noiseRef = useRef(new Noise(Math.random()));
   const boundingRef = useRef({ width: 0, height: 0, left: 0, top: 0 });
+  
+  // Detect if device has touch as primary input
+  const isTouchDevice = useRef(
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches
+  );
 
   // Set size
   const setSize = () => {
@@ -216,8 +221,8 @@ const WaveBackground = () => {
     // Mouse angle
     mouse.a = Math.atan2(dy, dx);
 
-    // Update CSS variables
-    if (containerRef.current) {
+    // Update CSS variables (only on non-touch devices)
+    if (containerRef.current && !isTouchDevice.current) {
       containerRef.current.style.setProperty('--x', `${mouse.sx}px`);
       containerRef.current.style.setProperty('--y', `${mouse.sy}px`);
     }
@@ -254,7 +259,11 @@ const WaveBackground = () => {
 
     // Add event listeners
     window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
+    
+    // Only add mouse listener on non-touch devices
+    if (!isTouchDevice.current) {
+      window.addEventListener('mousemove', handleMouseMove);
+    }
     
     if (containerRef.current) {
       containerRef.current.addEventListener('touchmove', handleTouchMove);
