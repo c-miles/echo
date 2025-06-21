@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import AuthenticationButton from "./AuthenticationButton";
+import WaveBackground from "./WaveBackground/WaveBackground";
 
 const LandingPage: React.FC = () => {
   const { isAuthenticated } = useAuth0();
@@ -14,10 +15,11 @@ const LandingPage: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-slate-900 to-black flex items-center justify-center px-4">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-6xl font-bold tracking-tight text-text mb-6">yap</h1>
-        <p className="text-xl text-text-muted mb-8">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4 relative overflow-hidden">
+      <WaveBackground />
+      <div className="text-center max-w-md mx-auto relative z-10 bg-slate-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl">
+        <h1 className="text-6xl font-bold tracking-tight text-text mb-4">yap</h1>
+        <p className="text-lg text-text-muted mb-6">
           Connect and engage effortlessly with yap, your go-to video conferencing
           solution.
         </p>

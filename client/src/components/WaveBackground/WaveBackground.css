@@ -1,0 +1,43 @@
+.wave-background {
+  --x: -0.5rem;
+  --y: 50%;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+.wave-background:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #1e293b; /* Slate-800 for the cursor dot */
+  border-radius: 50%;
+  transform: translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0);
+  will-change: transform;
+  content: "";
+  z-index: 2;
+  pointer-events: none;
+}
+
+.wave-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wave-line {
+  fill: none;
+  stroke: #1e293b; /* Slate-800 for the wave lines */
+  stroke-width: 1px;
+  opacity: 0.6;
+}
